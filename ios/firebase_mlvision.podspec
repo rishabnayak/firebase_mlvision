@@ -18,6 +18,6 @@ A new flutter plugin project.
   s.dependency 'Firebase/Core'
   s.dependency 'Firebase/MLVision'
   s.dependency 'Firebase/MLVisionAutoML'
-  s.ios.deployment_target = '9.0'
+  s.ios.deployment_target = '8.0'
   s.static_framework = true
 end
