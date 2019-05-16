@@ -8,16 +8,17 @@ Pod::Spec.new do |s|
   s.description      = <<-DESC
 A new flutter plugin project.
                        DESC
-  s.homepage         = 'http://example.com'
+  s.homepage         = 'https://github.com/rishab2113/firebase_mlvision/tree/master'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Your Company' => 'email@example.com' }
+  s.author           = { 'Rishab Nayak' => 'rishab@bu.edu' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
-  s.dependency 'Firebase/Core'
-  s.dependency 'Firebase/MLVision'
-  s.dependency 'Firebase/MLVisionAutoML'
+  s.dependency 'FirebaseCore'
+  s.dependency 'FirebaseMLCommon'
+  s.dependency 'FirebaseMLVision'
+  s.dependency 'FirebaseMLVisionAutoML'
   s.ios.deployment_target = '9.0'
   s.static_framework = true
 end
