@@ -1,5 +1,21 @@
 part of firebase_mlvision;
 
+/// Used for finding [VisionEdgeImageLabel]s in a supplied image.
+///
+///
+/// A image labeler is created via
+/// `visionEdgeImageLabeler(String dataset, [VisionEdgeImageLabelerOptions options])` in [FirebaseVision]:
+///
+/// ```dart
+/// final FirebaseVisionImage image =
+///     FirebaseVisionImage.fromFilePath('path/to/file');
+///
+/// final VisionEdgeImageLabeler imageLabeler =
+///     FirebaseVision.instance.visionEdgeImageLabeler("dataset", options);
+///
+/// final List<VisionEdgeImageLabel> labels = await imageLabeler.processImage(image);
+/// ```
+
 class VisionEdgeImageLabeler {
   VisionEdgeImageLabeler._({@required dynamic options, @required String dataset})
       : _options = options,
@@ -61,17 +77,10 @@ class VisionEdgeImageLabelerOptions {
 class VisionEdgeImageLabel {
   VisionEdgeImageLabel._(dynamic data)
       : confidence = data['confidence'],
-        entityId = data['entityId'],
         text = data['text'];
 
   /// The overall confidence of the result. Range [0.0, 1.0].
   final double confidence;
-
-  /// The opaque entity ID.
-  ///
-  /// IDs are available in Google Knowledge Graph Search API
-  /// https://developers.google.com/knowledge-graph/
-  final String entityId;
 
   /// A detected label from the given image.
   ///

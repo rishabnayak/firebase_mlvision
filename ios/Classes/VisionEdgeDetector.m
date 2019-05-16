@@ -3,22 +3,17 @@
 @import FirebaseMLCommon;
 
 @implementation VisionEdgeDetector
-static FIRVisionImageLabeler *labeler;
 
 + (void)handleDetection:(FIRVisionImage *)image options:(NSDictionary *)options result:(FlutterResult)result {
-    NSString *manifestPath = [NSBundle.mainBundle pathForResource:@"manifest"
-        ofType:@"json"
-        inDirectory:options[@"dataset"]];
+    NSString *pathStart = @"Frameworks/App.framework/flutter_assets/assets/";
+    NSString *datasetAppended = [pathStart stringByAppendingString:options[@"dataset"]];
+    NSString *finalPath = [datasetAppended stringByAppendingString:@"/manifest.json"];
+    NSString *manifestPath = [[NSBundle mainBundle] pathForResource:finalPath ofType:nil];
     FIRLocalModel *localModel = [[FIRLocalModel alloc] initWithName:options[@"dataset"]
         path:manifestPath];
     [[FIRModelManager modelManager] registerLocalModel:localModel];
-    FIRVisionOnDeviceAutoMLImageLabelerOptions *labelerOptions =
-    [[FIRVisionOnDeviceAutoMLImageLabelerOptions alloc]
-     initWithRemoteModelName: nil
-     localModelName:options[@"dataset"]];
-    labelerOptions.confidenceThreshold = 0.5;
     FIRVisionImageLabeler *labeler =
-    [[FIRVision vision] onDeviceAutoMLImageLabelerWithOptions:labelerOptions];
+    [[FIRVision vision] onDeviceAutoMLImageLabelerWithOptions:[VisionEdgeDetector parseOptions: options]];
     [labeler
      processImage:image
      completion:^(NSArray<FIRVisionImageLabel *> *_Nullable labels, NSError *_Nullable error) {
@@ -33,7 +28,6 @@ static FIRVisionImageLabeler *labeler;
          for (FIRVisionImageLabel *label in labels) {
              NSDictionary *data = @{
                                     @"confidence" : label.confidence,
-                                    @"entityID" : label.entityID,
                                     @"text" : label.text,
                                     };
              [labelData addObject:data];
@@ -45,8 +39,12 @@ static FIRVisionImageLabeler *labeler;
 
 + (FIRVisionOnDeviceAutoMLImageLabelerOptions *)parseOptions:(NSDictionary *)optionsData {
     NSNumber *conf = optionsData[@"confidenceThreshold"];
+    NSString *dataset = optionsData[@"dataset"];
     
-    FIRVisionOnDeviceAutoMLImageLabelerOptions *options = [FIRVisionOnDeviceAutoMLImageLabelerOptions new];
+    FIRVisionOnDeviceAutoMLImageLabelerOptions *options =
+        [[FIRVisionOnDeviceAutoMLImageLabelerOptions alloc]
+         initWithRemoteModelName: nil
+         localModelName: dataset];
     options.confidenceThreshold = [conf floatValue];
     
     return options;

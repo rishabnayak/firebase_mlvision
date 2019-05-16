@@ -1,4 +1,6 @@
 PODS:
+  - camera (0.0.1):
+    - Flutter
   - Firebase/Core (6.0.0):
     - Firebase/CoreOnly
     - FirebaseAnalytics (= 6.0.0)
@@ -131,6 +133,7 @@ PODS:
   - TensorFlowLite (1.13.1)
 
 DEPENDENCIES:
+  - camera (from `.symlinks/plugins/camera/ios`)
   - Firebase/MLVisionBarcodeModel
   - Firebase/MLVisionFaceModel
   - Firebase/MLVisionLabelModel
@@ -165,6 +168,8 @@ SPEC REPOS:
     - TensorFlowLite
 
 EXTERNAL SOURCES:
+  camera:
+    :path: ".symlinks/plugins/camera/ios"
   firebase_core:
     :path: ".symlinks/plugins/firebase_core/ios"
   firebase_mlvision:
@@ -177,6 +182,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/path_provider/ios"
 
 SPEC CHECKSUMS:
+  camera: d56ad165545ae5a0ffb892376033760a969c68c8
   Firebase: fa80b9d987ca014a1ba9357496ef2a0178b28b12
   firebase_core: ce5006bb48508ee4e71e0f429a3f519bb8ee2961
   firebase_mlvision: 647ae3bd642f9ba73601384eaaff6d1ccf8fe2d1
