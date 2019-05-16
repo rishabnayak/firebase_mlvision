@@ -95,6 +95,11 @@ class _MyHomePageState extends State<_MyHomePage> {
             FirebaseVision.instance.textRecognizer();
         results = await recognizer.processImage(visionImage);
         break;
+      case Detector.visionEdgeLabel:
+        final VisionEdgeImageLabeler recognizer =
+            FirebaseVision.instance.visionEdgeImageLabeler('potholes');
+        results = await recognizer.processImage(visionImage);
+        break;
       default:
         return;
     }
@@ -122,6 +127,9 @@ class _MyHomePageState extends State<_MyHomePage> {
         break;
       case Detector.text:
         painter = TextDetectorPainter(_imageSize, results);
+        break;
+      case Detector.visionEdgeLabel:
+        painter = LabelDetectorPainter(_imageSize, results);
         break;
       default:
         break;
@@ -186,6 +194,10 @@ class _MyHomePageState extends State<_MyHomePage> {
                   const PopupMenuItem<Detector>(
                     child: Text('Detect Text'),
                     value: Detector.text,
+                  ),
+                  const PopupMenuItem<Detector>(
+                    child: Text('Detect Vision Edge Label'),
+                    value: Detector.visionEdgeLabel,
                   ),
                 ],
           ),

@@ -43,6 +43,13 @@ class FirebaseVision {
     return BarcodeDetector._(options ?? const BarcodeDetectorOptions());
   }
 
+  VisionEdgeImageLabeler visionEdgeImageLabeler(String dataset, [VisionEdgeImageLabelerOptions options]){
+    return VisionEdgeImageLabeler._(
+      options: options ?? const VisionEdgeImageLabelerOptions(),
+      dataset: dataset
+    );
+  }
+
   /// Creates an instance of [FaceDetector].
   FaceDetector faceDetector([FaceDetectorOptions options]) {
     return FaceDetector._(options ?? const FaceDetectorOptions());

@@ -25,3 +25,6 @@
 
 @interface TextRecognizer : NSObject <Detector>
 @end
+
+@interface VisionEdgeDetector : NSObject <Detector>
+@end

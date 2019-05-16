@@ -15,9 +15,10 @@ A new flutter plugin project.
   s.source_files = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
-  s.dependency 'Firebase/Core'
-  s.dependency 'Firebase/MLVision'
-  s.dependency 'Firebase/MLVisionAutoML'
+  s.dependency 'FirebaseCore'
+  s.dependency 'FirebaseMLCommon'
+  s.dependency 'FirebaseMLVision'
+  s.dependency 'FirebaseMLVisionAutoML'
   s.ios.deployment_target = '9.0'
   s.static_framework = true
 end
