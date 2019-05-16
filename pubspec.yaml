@@ -1,8 +1,8 @@
 name: firebase_mlvision
-description: A new flutter plugin project.
+description: Flutter plugin for Firebase MLVision with AutoML Vision Edge Support
 version: 0.0.1
-author:
-homepage:
+author: Rishab Nayak <rishab@bu.edu>
+homepage: https://github.com/rishab2113/firebase_mlvision/tree/master
 
 environment:
   sdk: ">=2.1.0 <3.0.0"
