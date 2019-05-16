@@ -10,7 +10,7 @@ Note: AutoML Vision Edge <iOS Only>, Local Models supported for now
 
 ## Usage
 
-To use this plugin, add `firebase_ml_vision` as a [dependency in your pubspec.yaml file](https://flutter.io/platform-plugins/). You must also configure Firebase for each platform project: Android and iOS (see the example folder or https://codelabs.developers.google.com/codelabs/flutter-firebase/#4 for step by step details).
+To use this plugin, add `firebase_mlvision` as a [dependency in your pubspec.yaml file](https://flutter.io/platform-plugins/). You must also configure Firebase for each platform project: Android and iOS (see the example folder or https://codelabs.developers.google.com/codelabs/flutter-firebase/#4 for step by step details).
 
 ### AutoML Vision Edge
 If you plan to use AutoML Vision Edge to detect labels using a custom model, download the trained model by following [these instructions](https://firebase.google.com/docs/ml-kit/train-image-labeler).
