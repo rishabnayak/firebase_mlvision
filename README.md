@@ -176,7 +176,7 @@ for (ImageLabel label in labels) {
 }
 ```
 
-c. Extract Vision Edge labels.
+c. Extract Cloud Vision Edge labels.
 
 ```dart
 for (VisionEdgeImageLabel label in labels) {
