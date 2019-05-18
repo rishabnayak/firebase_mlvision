@@ -184,6 +184,7 @@ static FlutterError *getFlutterError(NSError *error) {
                                                  CVPixelBufferGetHeight(pixelBufferRef))];
 
   UIImage *uiImage = [UIImage imageWithCGImage:videoImage];
+  CVPixelBufferRelease(pixelBufferRef);
   CGImageRelease(videoImage);
   return [[FIRVisionImage alloc] initWithImage:uiImage];
 }
