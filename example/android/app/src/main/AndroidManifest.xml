@@ -25,7 +25,7 @@
                 android:name="io.flutter.app.android.SplashScreenUntilFirstFrame"
                 android:value="true"
                 android:name="com.google.firebase.ml.vision.DEPENDENCIES"
-                android:value="face"/>
+                android:value="ocr,face,barcode,label"/>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
