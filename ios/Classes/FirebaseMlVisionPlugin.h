@@ -14,6 +14,13 @@
 @optional
 @end
 
+@protocol ModelManager
+@required
++ (void)modelName:(NSString *)modelName
+         result:(FlutterResult)result;
+@optional
+@end
+
 @interface BarcodeDetector : NSObject <Detector>
 @end
 
@@ -26,5 +33,14 @@
 @interface TextRecognizer : NSObject <Detector>
 @end
 
-@interface VisionEdgeDetector : NSObject <Detector>
+@interface LocalVisionEdgeDetector : NSObject <Detector>
+@end
+
+@interface RemoteVisionEdgeDetector : NSObject <Detector>
+@end
+
+@interface SetupLocalModel : NSObject <ModelManager>
+@end
+
+@interface SetupRemoteModel : NSObject <ModelManager>
 @end
