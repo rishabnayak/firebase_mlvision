@@ -68,7 +68,6 @@ class _MyHomePageState extends State<_MyHomePage> {
 
   HandleDetection _getDetectionMethod() {
     final FirebaseVision mlVision = FirebaseVision.instance;
-
     switch (_currentDetector) {
       case Detector.text:
         return mlVision.textRecognizer().processImage;
@@ -80,7 +79,7 @@ class _MyHomePageState extends State<_MyHomePage> {
         return mlVision.cloudImageLabeler().processImage;
       case Detector.visionEdgeLabel:
         return mlVision
-            .visionEdgeImageLabeler('potholes', Model.Local)
+            .visionEdgeImageLabeler('potholes', ModelLocation.Local)
             .processImage;
         break;
       default:
