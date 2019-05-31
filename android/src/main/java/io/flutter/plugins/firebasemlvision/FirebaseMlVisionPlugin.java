@@ -1,4 +1,5 @@
-package com.example.firebase_mlvision;
+package io.flutter.plugins.firebasemlvision;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -26,7 +27,7 @@ public class FirebaseMlVisionPlugin implements MethodCallHandler {
   /** Plugin registration. */
   public static void registerWith(Registrar registrar) {
     final MethodChannel channel =
-        new MethodChannel(registrar.messenger(), "plugins.flutter.io/firebase_ml_vision");
+        new MethodChannel(registrar.messenger(), "plugins.flutter.io/firebase_mlvision");
     channel.setMethodCallHandler(new FirebaseMlVisionPlugin(registrar));
   }
 

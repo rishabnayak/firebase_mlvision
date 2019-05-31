@@ -1,4 +1,4 @@
-package com.example.firebase_mlvision;
+package io.flutter.plugins.firebasemlvision;
 
 import android.graphics.Point;
 import android.graphics.Rect;
