@@ -63,12 +63,12 @@ public class FirebaseMlVisionPlugin implements MethodCallHandler {
       case "VisionEdgeImageLabeler#processRemoteImage":
         RemoteVisionEdgeDetector.instance.handleDetection(image, options, result);
         break;
-//       case "ModelManager#setupLocalModel":
-//         SetupLocalModel.instance.setup(modelName, result);
-//         break;
-//       case "ModelManager#setupRemoteModel":
-//         SetupRemoteModel.instance.setup(modelName, result);
-//         break;
+      case "ModelManager#setupLocalModel":
+        SetupLocalModel.instance.setup(modelName, result);
+        break;
+      case "ModelManager#setupRemoteModel":
+        SetupRemoteModel.instance.setup(modelName, result);
+        break;
       default:
         result.notImplemented();
     }
