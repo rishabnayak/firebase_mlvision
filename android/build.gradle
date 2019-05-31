@@ -1,4 +1,4 @@
-def PLUGIN = "firebase_ml_vision";
+def PLUGIN = "firebase_mlvision";
 def ANDROIDX_WARNING = "flutterPluginsAndroidXWarning";
 gradle.buildFinished { buildResult ->
     if (buildResult.failure && !rootProject.ext.has(ANDROIDX_WARNING)) {
@@ -48,6 +48,7 @@ android {
 
     dependencies {
         api 'com.google.firebase:firebase-ml-vision:20.0.0'
+        api 'com.google.firebase:firebase-ml-vision-automl:16.0.0'
         implementation 'androidx.annotation:annotation:1.0.0'
         implementation 'androidx.exifinterface:exifinterface:1.0.0'
     }
