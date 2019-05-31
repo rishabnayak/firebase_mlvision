@@ -61,6 +61,27 @@ class RemoteVisionEdgeDetector implements Detector {
                         .setUpdatesDownloadConditions(conditions)
                         .build();
                 FirebaseModelManager.getInstance().registerRemoteModel(remoteModel);
+                FirebaseModelManager.getInstance().downloadRemoteModelIfNeeded(remoteModel)
+                        .addOnSuccessListener(
+                                new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void success) {
+                                        try {
+                                            labeler = FirebaseVision.getInstance().getOnDeviceAutoMLImageLabeler(parseOptions(options));
+                                        } catch (FirebaseMLException e) {
+                                            result.error("visionEdgeLabelDetectorLabelerError", e.getLocalizedMessage(), null);
+                                            return;
+                                        }
+                                    }
+                                })
+                        .addOnFailureListener(
+                                new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        result.error("visionEdgeLabelDetectorLabelerError", e.getLocalizedMessage(), null);
+                                        return;
+                                    }
+                                });
                 try {
                     labeler = FirebaseVision.getInstance().getOnDeviceAutoMLImageLabeler(parseOptions(options));
                 } catch (FirebaseMLException e) {
