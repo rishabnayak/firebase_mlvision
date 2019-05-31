@@ -2,36 +2,38 @@ package io.flutter.plugins.firebasemlvision;
 
 import androidx.annotation.NonNull;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.ml.common.FirebaseMLException;
-import com.google.firebase.ml.common.modeldownload.FirebaseLocalModel;
+import com.google.firebase.ml.common.modeldownload.FirebaseModelDownloadConditions;
 import com.google.firebase.ml.common.modeldownload.FirebaseModelManager;
+import com.google.firebase.ml.common.modeldownload.FirebaseRemoteModel;
 import com.google.firebase.ml.vision.FirebaseVision;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.label.FirebaseVisionImageLabel;
 import com.google.firebase.ml.vision.label.FirebaseVisionImageLabeler;
 import com.google.firebase.ml.vision.label.FirebaseVisionOnDeviceAutoMLImageLabelerOptions;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import io.flutter.plugin.common.MethodChannel;
 
-class RemoteVisionEdgeDetector implements Detector{
+class RemoteVisionEdgeDetector implements Detector {
     static final RemoteVisionEdgeDetector instance = new RemoteVisionEdgeDetector();
 
-    private RemoteVisionEdgeDetector() {}
+    private RemoteVisionEdgeDetector() {
+    }
 
     private FirebaseVisionImageLabeler labeler;
     private Map<String, Object> lastOptions;
 
     @Override
     public void handleDetection(
-            FirebaseVisionImage image, Map<String, Object> options, final MethodChannel.Result result) {
+            FirebaseVisionImage image, final Map<String, Object> options, final MethodChannel.Result result) {
 
         // Use instantiated labeler if the options are the same. Otherwise, close and instantiate new
         // options.
@@ -50,19 +52,43 @@ class RemoteVisionEdgeDetector implements Detector{
 
         if (labeler == null) {
             lastOptions = options;
-            String finalPath = "flutter_assets/assets/"+options.get("dataset")+"/manifest.json";
-            FirebaseLocalModel localModel = FirebaseModelManager.getInstance().getLocalModel((String) options.get("dataset"));
-            if (localModel == null){
-                localModel = new FirebaseLocalModel.Builder((String) options.get("dataset"))
-                        .setAssetFilePath(finalPath)
+            FirebaseRemoteModel remoteModel = FirebaseModelManager.getInstance().getNonBaseRemoteModel((String) options.get("dataset"));
+            if (remoteModel == null) {
+                FirebaseModelDownloadConditions conditions = new FirebaseModelDownloadConditions.Builder().build();
+                remoteModel = new FirebaseRemoteModel.Builder((String) options.get("dataset"))
+                        .enableModelUpdates(true)
+                        .setInitialDownloadConditions(conditions)
+                        .setUpdatesDownloadConditions(conditions)
                         .build();
-                FirebaseModelManager.getInstance().registerLocalModel(localModel);
+                FirebaseModelManager.getInstance().registerRemoteModel(remoteModel);
                 try {
                     labeler = FirebaseVision.getInstance().getOnDeviceAutoMLImageLabeler(parseOptions(options));
                 } catch (FirebaseMLException e) {
                     result.error("visionEdgeLabelDetectorLabelerError", e.getLocalizedMessage(), null);
                     return;
                 }
+            } else {
+                FirebaseModelManager.getInstance().downloadRemoteModelIfNeeded(remoteModel)
+                        .addOnSuccessListener(
+                                new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void success) {
+                                        try {
+                                            labeler = FirebaseVision.getInstance().getOnDeviceAutoMLImageLabeler(parseOptions(options));
+                                        } catch (FirebaseMLException e) {
+                                            result.error("visionEdgeLabelDetectorLabelerError", e.getLocalizedMessage(), null);
+                                            return;
+                                        }
+                                    }
+                                })
+                        .addOnFailureListener(
+                                new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        result.error("visionEdgeLabelDetectorLabelerError", e.getLocalizedMessage(), null);
+                                        return;
+                                    }
+                                });
             }
         }
 
@@ -96,7 +122,7 @@ class RemoteVisionEdgeDetector implements Detector{
     private FirebaseVisionOnDeviceAutoMLImageLabelerOptions parseOptions(Map<String, Object> optionsData) {
         float conf = (float) (double) optionsData.get("confidenceThreshold");
         return new FirebaseVisionOnDeviceAutoMLImageLabelerOptions.Builder()
-                .setLocalModelName((String) optionsData.get("dataset"))
+                .setRemoteModelName((String) optionsData.get("dataset"))
                 .setConfidenceThreshold(conf)
                 .build();
     }
