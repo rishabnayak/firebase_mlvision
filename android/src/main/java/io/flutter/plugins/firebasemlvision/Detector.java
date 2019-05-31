@@ -1,4 +1,4 @@
-package com.example.firebase_mlvision;
+package io.flutter.plugins.firebasemlvision;
 
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import io.flutter.plugin.common.MethodChannel;
