@@ -29,6 +29,15 @@ Create a `assets` folder and place the previous folder within it. In `pubspec.ya
 ```
 
 ### Android
+
+If you're using local AutoML VisionEdge Models, include this in your app-level build.gradle file.
+
+```
+aaptOptions {
+    noCompress "tflite"
+}
+```
+
 If you're using the on-device `ImageLabeler`, include the latest matching [ML Kit: Image Labeling](https://firebase.google.com/support/release-notes/android) dependency in your app-level build.gradle file.
 
 ```
