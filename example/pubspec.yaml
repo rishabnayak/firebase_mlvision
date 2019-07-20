@@ -9,7 +9,6 @@ dependencies:
   flutter:
     sdk: flutter
 
-  image_picker: ^0.5.0
   cupertino_icons: ^0.1.2
   firebase_mlvision:
     path: ../
@@ -22,8 +21,6 @@ dev_dependencies:
   flutter_driver:
     sdk: flutter
   test: any
-  path: ^1.6.2
-  path_provider: ^0.5.0+1
 
 flutter:
   uses-material-design: true

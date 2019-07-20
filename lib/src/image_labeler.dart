@@ -38,7 +38,7 @@ class ImageLabeler {
   final dynamic _options;
 
   /// Finds entities in the input image.
-  Future<List<ImageLabel>> processImage(FirebaseVisionImage visionImage) async {
+  Future<List<ImageLabel>> processImage() async {
     // TODO(amirh): remove this on when the invokeMethod update makes it to stable Flutter.
     // https://github.com/flutter/flutter/issues/26431
     // ignore: strong_mode_implicit_dynamic_method
@@ -49,7 +49,7 @@ class ImageLabeler {
           'modelType': _enumToString(modelType),
           'confidenceThreshold': _options.confidenceThreshold,
         },
-      }..addAll(visionImage._serialize()),
+      }
     );
 
     final List<ImageLabel> labels = <ImageLabel>[];

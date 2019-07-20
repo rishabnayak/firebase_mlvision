@@ -12,15 +12,12 @@ dependencies:
     sdk: flutter
 
 dev_dependencies:
-  image_picker: ^0.5.0
   flutter_test:
     sdk: flutter
   firebase_core: ^0.4.0
   flutter_driver:
     sdk: flutter
   test: any
-  path: ^1.6.2
-  path_provider: ^0.5.0+1
   camera: ^0.4.2
 
 # For information on the generic Dart part of this file, see the
