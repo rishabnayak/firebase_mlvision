@@ -192,6 +192,7 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
 
   final FirebaseCameraDescription description;
   final ResolutionSetting resolutionPreset;
+  static int nextHandle = 0;
 
   int _textureId;
   bool _isDisposed = false;
@@ -284,7 +285,9 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
 
   /// Creates an instance of [BarcodeDetector].
   BarcodeDetector barcodeDetector([BarcodeDetectorOptions options]) {
-    return BarcodeDetector._(options ?? const BarcodeDetectorOptions());
+    return BarcodeDetector._(options ?? const BarcodeDetectorOptions(),
+    nextHandle++,
+    );
   }
 
   /// Creates an instance of [VisionEdgeImageLabeler].
@@ -294,12 +297,14 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
     return VisionEdgeImageLabeler._(
         options: options ?? const VisionEdgeImageLabelerOptions(),
         dataset: dataset,
+        handle: nextHandle++,
         modelLocation: modelLocation);
   }
 
   /// Creates an instance of [FaceDetector].
   FaceDetector faceDetector([FaceDetectorOptions options]) {
-    return FaceDetector._(options ?? const FaceDetectorOptions());
+    return FaceDetector._(options ?? const FaceDetectorOptions(),
+    nextHandle++,);
   }
 
   /// Creates an instance of [ModelManager].
@@ -312,17 +317,22 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
     return ImageLabeler._(
       options: options ?? const ImageLabelerOptions(),
       modelType: ModelType.onDevice,
+      handle: nextHandle++,
     );
   }
 
   /// Creates an instance of [TextRecognizer].
-  TextRecognizer textRecognizer() => TextRecognizer._();
+  TextRecognizer textRecognizer() => TextRecognizer._(
+    modelType: ModelType.onDevice,
+    handle: nextHandle++,
+  );
 
   /// Creates a cloud instance of [ImageLabeler].
   ImageLabeler cloudImageLabeler([CloudImageLabelerOptions options]) {
     return ImageLabeler._(
       options: options ?? const CloudImageLabelerOptions(),
       modelType: ModelType.cloud,
+      handle: nextHandle++,
     );
   }
 }

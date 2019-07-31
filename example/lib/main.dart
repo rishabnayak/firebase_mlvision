@@ -28,9 +28,6 @@ class _MyHomePageState extends State<_MyHomePage> {
       if (!mounted) {
         return;
       }
-      _vision.imageLabeler().processImage().then((onValue){
-       print(onValue);
-      });
       setState(() {});
     });
   }

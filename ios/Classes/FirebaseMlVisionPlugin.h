@@ -8,16 +8,14 @@
 
 @protocol Detector
 @required
-+ (void)handleDetection:(FIRVisionImage *)image
-                options:(NSDictionary *)options
-                 result:(FlutterResult)result;
+- (instancetype)initWithVision:(FIRVision *)vision options:(NSDictionary *)options;
+- (void)handleDetection:(FIRVisionImage *)image result:(FlutterResult)result;
 @optional
 @end
 
 @protocol ModelManager
 @required
-+ (void)modelName:(NSString *)modelName
-         result:(FlutterResult)result;
++ (void)modelName:(NSString *)modelName result:(FlutterResult)result;
 @optional
 @end
 
