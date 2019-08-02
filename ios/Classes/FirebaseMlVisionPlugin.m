@@ -139,6 +139,7 @@ FourCharCode const format = kCVPixelFormatType_32BGRA;
 - (void)captureOutput:(AVCaptureOutput *)output
 didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
        fromConnection:(AVCaptureConnection *)connection {
+    CVImageBufferRef newBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
     if (output == _captureVideoOutput) {
         CVPixelBufferRef newBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
         CFRetain(newBuffer);
@@ -210,6 +211,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 }
 
 static NSMutableDictionary<NSNumber *, id<Detector>> *detectors;
+FlutterEventSink resultSink;
 
 + (void)handleError:(NSError *)error result:(FlutterResult)result {
     result(getFlutterError(error));
@@ -217,12 +219,14 @@ static NSMutableDictionary<NSNumber *, id<Detector>> *detectors;
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar {
     detectors = [NSMutableDictionary new];
+    FlutterEventChannel *results = [FlutterEventChannel eventChannelWithName:@"plugins.flutter.io/firebase_mlvision_results" binaryMessenger:[registrar messenger]];
     FlutterMethodChannel *channel =
     [FlutterMethodChannel methodChannelWithName:@"plugins.flutter.io/firebase_mlvision"
                                 binaryMessenger:[registrar messenger]];
     FLTFirebaseMlVisionPlugin *instance = [[FLTFirebaseMlVisionPlugin alloc] initWithRegistry:[registrar textures]
                                                                                     messenger:[registrar messenger]];
     [registrar addMethodCallDelegate:instance channel:channel];
+    [results setStreamHandler:instance];
 
     SEL sel = NSSelectorFromString(@"registerLibrary:withVersion:");
     if ([FIRApp respondsToSelector:sel]) {
@@ -258,6 +262,8 @@ static NSMutableDictionary<NSNumber *, id<Detector>> *detectors;
 
 - (void)handleMethodCallAsync:(FlutterMethodCall *)call result:(FlutterResult)result {
     NSString *modelName = call.arguments[@"model"];
+    NSDictionary *options = call.arguments[@"options"];
+    NSNumber *handle = call.arguments[@"handle"];
   if ([@"ModelManager#setupLocalModel" isEqualToString:call.method]) {
     [SetupLocalModel modelName:modelName result:result];
   } else if ([@"ModelManager#setupRemoteModel" isEqualToString:call.method]) {
@@ -307,7 +313,7 @@ static NSMutableDictionary<NSNumber *, id<Detector>> *detectors;
             int64_t textureId = [_registry registerTexture:cam];
             _camera = cam;
             cam.onFrameAvailable = ^{
-                [_registry textureFrameAvailable:textureId];
+                [self->_registry textureFrameAvailable:textureId];
             };
             FlutterEventChannel *eventChannel = [FlutterEventChannel
                                                  eventChannelWithName:[NSString
@@ -322,6 +328,12 @@ static NSMutableDictionary<NSNumber *, id<Detector>> *detectors;
                      @"previewHeight" : @(cam.previewSize.height),
                      });
             [cam start];
+        }
+    } else if ([@"BarcodeDetector#startDetection" isEqualToString:call.method]){
+        id<Detector> detector = detectors[handle];
+        if (!detector) {
+            detector = [[BarcodeDetector alloc] initWithVision:[FIRVision vision] options:options];
+            [FLTFirebaseMlVisionPlugin addDetector:handle detector:detector];
         }
     } else if ([@"BarcodeDetector#detectInImage" isEqualToString:call.method] ||
              [@"FaceDetector#processImage" isEqualToString:call.method] ||
@@ -519,6 +531,16 @@ static NSMutableDictionary<NSNumber *, id<Detector>> *detectors;
   }
 
   detectors[handle] = detector;
+}
+
+- (FlutterError * _Nullable)onCancelWithArguments:(id _Nullable)arguments {
+    resultSink = nil;
+    return nil;
+}
+
+- (FlutterError * _Nullable)onListenWithArguments:(id _Nullable)arguments eventSink:(nonnull FlutterEventSink)events {
+    resultSink = events;
+    return nil;
 }
 
 @end

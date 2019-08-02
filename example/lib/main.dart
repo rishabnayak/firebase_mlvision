@@ -28,6 +28,7 @@ class _MyHomePageState extends State<_MyHomePage> {
       if (!mounted) {
         return;
       }
+      _vision.addBarcodeDetector().forEach((action) => print(action)); 
       setState(() {});
     });
   }

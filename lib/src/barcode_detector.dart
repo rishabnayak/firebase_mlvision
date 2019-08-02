@@ -192,27 +192,24 @@ class BarcodeDetector {
   bool _isClosed = false;
 
   /// Detects barcodes in the input image.
-  Future<List<Barcode>> detectInImage(FirebaseVisionImage visionImage) async {
+  Stream<List<Barcode>> startDetection() {
     assert(!_isClosed);
 
     _hasBeenOpened = true;
-    final List<dynamic> reply =
-        await FirebaseVision.channel.invokeListMethod<dynamic>(
-      'BarcodeDetector#detectInImage',
+    Stream<dynamic> data = Stream.empty();
+    FirebaseVision.channel.invokeListMethod<dynamic>(
+      'BarcodeDetector#startDetection',
       <String, dynamic>{
         'handle': _handle,
         'options': <String, dynamic>{
           'barcodeFormats': options.barcodeFormats.value,
         },
-      }..addAll(visionImage._serialize()),
-    );
-
-    final List<Barcode> barcodes = <Barcode>[];
-    reply.forEach((dynamic barcode) {
-      barcodes.add(Barcode._(barcode));
+      },
+    ).then((onValue){
+      const EventChannel resultsChannel = EventChannel('plugins.flutter.io/firebase_mlvision_results');
+      data = resultsChannel.receiveBroadcastStream();
     });
-
-    return barcodes;
+    return data;
   }
 
   /// Release resources used by this detector.
