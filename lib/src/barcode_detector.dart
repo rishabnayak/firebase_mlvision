@@ -192,7 +192,7 @@ class BarcodeDetector {
   bool _isClosed = false;
 
   /// Detects barcodes in the input image.
-  Stream<List<Barcode>> startDetection() {
+  Stream<Barcode> startDetection() {
     assert(!_isClosed);
 
     _hasBeenOpened = true;
@@ -207,7 +207,7 @@ class BarcodeDetector {
       },
     ).then((onValue){
       const EventChannel resultsChannel = EventChannel('plugins.flutter.io/firebase_mlvision_results');
-      data = resultsChannel.receiveBroadcastStream();
+      data = resultsChannel.receiveBroadcastStream().map((convert) => Barcode._(convert));
     });
     return data;
   }

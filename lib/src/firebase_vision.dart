@@ -284,7 +284,7 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
   }
 
   /// Creates an instance of [BarcodeDetector].
-  Stream<List<Barcode>> addBarcodeDetector([BarcodeDetectorOptions options]) {
+  Stream<Barcode> addBarcodeDetector([BarcodeDetectorOptions options]) {
     BarcodeDetector detector = BarcodeDetector._(options ?? const BarcodeDetectorOptions(),
     nextHandle++,
     );

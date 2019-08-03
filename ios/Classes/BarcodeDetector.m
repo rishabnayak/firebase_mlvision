@@ -13,7 +13,7 @@
   return self;
 }
 
-- (void)handleDetection:(FIRVisionImage *)image result:(FlutterResult)result {
+- (void)handleDetection:(FIRVisionImage *)image result:(FlutterEventSink)result {
   [_detector detectInImage:image
                 completion:^(NSArray<FIRVisionBarcode *> *barcodes, NSError *error) {
                   if (error) {

@@ -13,8 +13,11 @@ static FlutterError *getFlutterError(NSError *error) {
 AVCaptureVideoDataOutputSampleBufferDelegate,
 AVCaptureAudioDataOutputSampleBufferDelegate,
 FlutterStreamHandler>
+@property(assign, atomic) BOOL isRecognizing;
 @property(readonly, nonatomic) int64_t textureId;
 @property(nonatomic, copy) void (^onFrameAvailable)();
+@property(nonatomic) id<Detector> activeDetector;
+@property(nonatomic) FlutterEventSink resultSink;
 @property(nonatomic) FlutterEventChannel *eventChannel;
 @property(nonatomic) FlutterEventSink eventSink;
 @property(readonly, nonatomic) AVCaptureSession *captureSession;
@@ -140,8 +143,17 @@ FourCharCode const format = kCVPixelFormatType_32BGRA;
 didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
        fromConnection:(AVCaptureConnection *)connection {
     CVImageBufferRef newBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
-    if (output == _captureVideoOutput) {
-        CVPixelBufferRef newBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+    if (newBuffer) {
+        if (!_isRecognizing) {
+            _isRecognizing = YES;
+            FIRVisionImage *visionImage = [[FIRVisionImage alloc] initWithBuffer:sampleBuffer];
+            FIRVisionImageMetadata *metadata = [[FIRVisionImageMetadata alloc] init];
+            FIRVisionDetectorImageOrientation visionOrientation = FIRVisionDetectorImageOrientationTopLeft;
+            
+            metadata.orientation = visionOrientation;
+            visionImage.metadata = metadata;
+            [_activeDetector handleDetection:visionImage result:_resultSink];
+        }
         CFRetain(newBuffer);
         CVPixelBufferRef old = _latestPixelBuffer;
         while (!OSAtomicCompareAndSwapPtrBarrier(old, newBuffer, (void **)&_latestPixelBuffer)) {
@@ -156,9 +168,9 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     }
     if (!CMSampleBufferDataIsReady(sampleBuffer)) {
         _eventSink(@{
-                     @"event" : @"error",
-                     @"errorDescription" : @"sample buffer is not ready. Skipping sample"
-                     });
+            @"event" : @"error",
+            @"errorDescription" : @"sample buffer is not ready. Skipping sample"
+        });
         return;
     }
 }
@@ -227,7 +239,7 @@ FlutterEventSink resultSink;
                                                                                     messenger:[registrar messenger]];
     [registrar addMethodCallDelegate:instance channel:channel];
     [results setStreamHandler:instance];
-
+    
     SEL sel = NSSelectorFromString(@"registerLibrary:withVersion:");
     if ([FIRApp respondsToSelector:sel]) {
         [FIRApp performSelector:sel withObject:LIBRARY_NAME withObject:LIBRARY_VERSION];
@@ -264,11 +276,11 @@ FlutterEventSink resultSink;
     NSString *modelName = call.arguments[@"model"];
     NSDictionary *options = call.arguments[@"options"];
     NSNumber *handle = call.arguments[@"handle"];
-  if ([@"ModelManager#setupLocalModel" isEqualToString:call.method]) {
-    [SetupLocalModel modelName:modelName result:result];
-  } else if ([@"ModelManager#setupRemoteModel" isEqualToString:call.method]) {
-    [SetupRemoteModel modelName:modelName result:result];
-  } else if ([@"camerasAvailable" isEqualToString:call.method]){
+    if ([@"ModelManager#setupLocalModel" isEqualToString:call.method]) {
+        [SetupLocalModel modelName:modelName result:result];
+    } else if ([@"ModelManager#setupRemoteModel" isEqualToString:call.method]) {
+        [SetupRemoteModel modelName:modelName result:result];
+    } else if ([@"camerasAvailable" isEqualToString:call.method]){
         AVCaptureDeviceDiscoverySession *discoverySession = [AVCaptureDeviceDiscoverySession
                                                              discoverySessionWithDeviceTypes:@[ AVCaptureDeviceTypeBuiltInWideAngleCamera ]
                                                              mediaType:AVMediaTypeVideo
@@ -290,10 +302,10 @@ FlutterEventSink resultSink;
                     break;
             }
             [reply addObject:@{
-                               @"name" : [device uniqueID],
-                               @"lensFacing" : lensFacing,
-                               @"sensorOrientation" : @90,
-                               }];
+                @"name" : [device uniqueID],
+                @"lensFacing" : lensFacing,
+                @"sensorOrientation" : @90,
+            }];
         }
         result(reply);
     } else if ([@"initialize" isEqualToString:call.method]) {
@@ -301,9 +313,9 @@ FlutterEventSink resultSink;
         NSString *resolutionPreset = call.arguments[@"resolutionPreset"];
         NSError *error;
         FirebaseCam *cam = [[FirebaseCam alloc] initWithCameraName:cameraName
-                                        resolutionPreset:resolutionPreset
-                                           dispatchQueue:_dispatchQueue
-                                                   error:&error];
+                                                  resolutionPreset:resolutionPreset
+                                                     dispatchQueue:_dispatchQueue
+                                                             error:&error];
         if (error) {
             result(getFlutterError(error));
         } else {
@@ -323,10 +335,10 @@ FlutterEventSink resultSink;
             [eventChannel setStreamHandler:cam];
             cam.eventChannel = eventChannel;
             result(@{
-                     @"textureId" : @(textureId),
-                     @"previewWidth" : @(cam.previewSize.width),
-                     @"previewHeight" : @(cam.previewSize.height),
-                     });
+                @"textureId" : @(textureId),
+                @"previewWidth" : @(cam.previewSize.width),
+                @"previewHeight" : @(cam.previewSize.height),
+            });
             [cam start];
         }
     } else if ([@"BarcodeDetector#startDetection" isEqualToString:call.method]){
@@ -335,52 +347,51 @@ FlutterEventSink resultSink;
             detector = [[BarcodeDetector alloc] initWithVision:[FIRVision vision] options:options];
             [FLTFirebaseMlVisionPlugin addDetector:handle detector:detector];
         }
+        _camera.activeDetector = detectors[handle];
     } else if ([@"BarcodeDetector#detectInImage" isEqualToString:call.method] ||
-             [@"FaceDetector#processImage" isEqualToString:call.method] ||
-             [@"ImageLabeler#processImage" isEqualToString:call.method] ||
-             [@"TextRecognizer#processImage" isEqualToString:call.method] ||
-             [@"VisionEdgeImageLabeler#processLocalImage" isEqualToString:call.method] ||
-             [@"VisionEdgeImageLabeler#processRemoteImage" isEqualToString:call.method]) {
-    [self handleDetection:call result:result];
-  } else if ([@"BarcodeDetector#close" isEqualToString:call.method] ||
-             [@"FaceDetector#close" isEqualToString:call.method] ||
-             [@"ImageLabeler#close" isEqualToString:call.method] ||
-             [@"TextRecognizer#close" isEqualToString:call.method] ||
-             [@"VisionEdgeImageLabeler#close" isEqualToString:call.method]) {
-    NSNumber *handle = call.arguments[@"handle"];
-    [detectors removeObjectForKey:handle];
-    result(nil);
-  } else {
-    result(FlutterMethodNotImplemented);
-  }
+               [@"FaceDetector#processImage" isEqualToString:call.method] ||
+               [@"ImageLabeler#processImage" isEqualToString:call.method] ||
+               [@"TextRecognizer#processImage" isEqualToString:call.method] ||
+               [@"VisionEdgeImageLabeler#processLocalImage" isEqualToString:call.method] ||
+               [@"VisionEdgeImageLabeler#processRemoteImage" isEqualToString:call.method]) {
+        [self handleDetection:call result:result];
+    } else if ([@"BarcodeDetector#close" isEqualToString:call.method] ||
+               [@"FaceDetector#close" isEqualToString:call.method] ||
+               [@"ImageLabeler#close" isEqualToString:call.method] ||
+               [@"TextRecognizer#close" isEqualToString:call.method] ||
+               [@"VisionEdgeImageLabeler#close" isEqualToString:call.method]) {
+        NSNumber *handle = call.arguments[@"handle"];
+        [detectors removeObjectForKey:handle];
+        result(nil);
+    } else {
+        result(FlutterMethodNotImplemented);
+    }
 }
 
 - (void)handleDetection:(FlutterMethodCall *)call result:(FlutterResult)result {
-  FIRVisionImage *image = [self dataToVisionImage:call.arguments];
-  NSDictionary *options = call.arguments[@"options"];
-
-  NSNumber *handle = call.arguments[@"handle"];
-  id<Detector> detector = detectors[handle];
-  if (!detector) {
-    if ([call.method hasPrefix:@"BarcodeDetector"]) {
-      detector = [[BarcodeDetector alloc] initWithVision:[FIRVision vision] options:options];
-    } else if ([call.method hasPrefix:@"FaceDetector"]) {
-      detector = [[FaceDetector alloc] initWithVision:[FIRVision vision] options:options];
-    } else if ([call.method hasPrefix:@"ImageLabeler"]) {
-      detector = [[ImageLabeler alloc] initWithVision:[FIRVision vision] options:options];
-    } else if ([call.method hasPrefix:@"TextRecognizer"]) {
-      detector = [[TextRecognizer alloc] initWithVision:[FIRVision vision] options:options];
-    } else if ([call.method isEqualToString:@"VisionEdgeImageLabeler#processLocalImage"]) {
-      detector = [[LocalVisionEdgeDetector alloc] initWithVision:[FIRVision vision]
-                                                         options:options];
-    } else if ([call.method isEqualToString:@"VisionEdgeImageLabeler#processRemoteImage"]) {
-      detector = [[RemoteVisionEdgeDetector alloc] initWithVision:[FIRVision vision]
-                                                          options:options];
+    FIRVisionImage *image = [self dataToVisionImage:call.arguments];
+    NSDictionary *options = call.arguments[@"options"];
+    NSNumber *handle = call.arguments[@"handle"];
+    id<Detector> detector = detectors[handle];
+    if (!detector) {
+        if ([call.method hasPrefix:@"BarcodeDetector"]) {
+            detector = [[BarcodeDetector alloc] initWithVision:[FIRVision vision] options:options];
+        } else if ([call.method hasPrefix:@"FaceDetector"]) {
+            detector = [[FaceDetector alloc] initWithVision:[FIRVision vision] options:options];
+        } else if ([call.method hasPrefix:@"ImageLabeler"]) {
+            detector = [[ImageLabeler alloc] initWithVision:[FIRVision vision] options:options];
+        } else if ([call.method hasPrefix:@"TextRecognizer"]) {
+            detector = [[TextRecognizer alloc] initWithVision:[FIRVision vision] options:options];
+        } else if ([call.method isEqualToString:@"VisionEdgeImageLabeler#processLocalImage"]) {
+            detector = [[LocalVisionEdgeDetector alloc] initWithVision:[FIRVision vision]
+                                                               options:options];
+        } else if ([call.method isEqualToString:@"VisionEdgeImageLabeler#processRemoteImage"]) {
+            detector = [[RemoteVisionEdgeDetector alloc] initWithVision:[FIRVision vision]
+                                                                options:options];
+        }
+        [FLTFirebaseMlVisionPlugin addDetector:handle detector:detector];
     }
-    [FLTFirebaseMlVisionPlugin addDetector:handle detector:detector];
-  }
-
-  [detectors[handle] handleDetection:image result:result];
+    [detectors[handle] handleDetection:image result:result];
 }
 
 - (FIRVisionImage *)dataToVisionImage:(NSDictionary *)imageData {
@@ -524,13 +535,13 @@ FlutterEventSink resultSink;
 }
 
 + (void)addDetector:(NSNumber *)handle detector:(id<Detector>)detector {
-  if (detectors[handle]) {
-    NSString *reason =
+    if (detectors[handle]) {
+        NSString *reason =
         [[NSString alloc] initWithFormat:@"Object for handle already exists: %d", handle.intValue];
-    @throw [[NSException alloc] initWithName:NSInvalidArgumentException reason:reason userInfo:nil];
-  }
-
-  detectors[handle] = detector;
+        @throw [[NSException alloc] initWithName:NSInvalidArgumentException reason:reason userInfo:nil];
+    }
+    
+    detectors[handle] = detector;
 }
 
 - (FlutterError * _Nullable)onCancelWithArguments:(id _Nullable)arguments {

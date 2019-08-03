@@ -23,7 +23,7 @@
   return self;
 }
 
-- (void)handleDetection:(FIRVisionImage *)image result:(FlutterResult)result {
+- (void)handleDetection:(FIRVisionImage *)image result:(FlutterEventSink)result {
   [_labeler
       processImage:image
         completion:^(NSArray<FIRVisionImageLabel *> *_Nullable labels, NSError *_Nullable error) {

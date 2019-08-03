@@ -23,7 +23,7 @@
   return self;
 }
 
-- (void)handleDetection:(FIRVisionImage *)image result:(FlutterResult)result {
+- (void)handleDetection:(FIRVisionImage *)image result:(FlutterEventSink)result {
   [_recognizer processImage:image
                  completion:^(FIRVisionText *_Nullable visionText, NSError *_Nullable error) {
                    if (error) {
