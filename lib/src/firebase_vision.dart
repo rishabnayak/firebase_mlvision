@@ -303,9 +303,11 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
   }
 
   /// Creates an instance of [FaceDetector].
-  FaceDetector faceDetector([FaceDetectorOptions options]) {
-    return FaceDetector._(options ?? const FaceDetectorOptions(),
-    nextHandle++,);
+  Stream<List<Face>> addFaceDetector([FaceDetectorOptions options]) {
+    FaceDetector detector = FaceDetector._(options ?? const FaceDetectorOptions(),
+    nextHandle++,
+    );
+        return detector.startDetection();
   }
 
   /// Creates an instance of [ModelManager].
@@ -314,12 +316,13 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
   }
 
   /// Creates an on device instance of [ImageLabeler].
-  ImageLabeler imageLabeler([ImageLabelerOptions options]) {
-    return ImageLabeler._(
+  Stream<List<ImageLabel>> addImageLabeler([ImageLabelerOptions options]) {
+    ImageLabeler labeler = ImageLabeler._(
       options: options ?? const ImageLabelerOptions(),
       modelType: ModelType.onDevice,
       handle: nextHandle++,
     );
+  return labeler.startDetection();
   }
 
   /// Creates an instance of [TextRecognizer].

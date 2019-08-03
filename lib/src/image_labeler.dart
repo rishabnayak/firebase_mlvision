@@ -45,28 +45,32 @@ class ImageLabeler {
   bool _isClosed = false;
 
   /// Finds entities in the input image.
-  Future<List<ImageLabel>> processImage(FirebaseVisionImage visionImage) async {
+  Stream<List<ImageLabel>> startDetection() {
     assert(!_isClosed);
 
     _hasBeenOpened = true;
-    final List<dynamic> reply =
-        await FirebaseVision.channel.invokeListMethod<dynamic>(
-      'ImageLabeler#processImage',
+    Stream<dynamic> data = Stream.empty();
+    FirebaseVision.channel.invokeListMethod<dynamic>(
+      'ImageLabeler#startDetection',
       <String, dynamic>{
         'handle': _handle,
         'options': <String, dynamic>{
           'modelType': _enumToString(modelType),
           'confidenceThreshold': _options.confidenceThreshold,
         },
-      }..addAll(visionImage._serialize()),
-    );
+      },
+      ).then((onValue){
+      const EventChannel resultsChannel = EventChannel('plugins.flutter.io/firebase_mlvision_results');
+      data = resultsChannel.receiveBroadcastStream();
+  });
 
+/*
     final List<ImageLabel> labels = <ImageLabel>[];
-    for (dynamic data in reply) {
+    for (dynamic data in data) {
       labels.add(ImageLabel._(data));
     }
-
-    return labels;
+*/
+    return data;
   }
 
   /// Release resources used by this labeler.

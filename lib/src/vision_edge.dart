@@ -42,16 +42,15 @@ class VisionEdgeImageLabeler {
   bool _isClosed = false;
 
   /// Finds entities in the input image.
-  Future<List<VisionEdgeImageLabel>> processImage(
-      FirebaseVisionImage visionImage) async {
+ Stream<List<VisionEdgeImageLabel>> startDetection() {
     assert(!_isClosed);
 
     _hasBeenOpened = true;
-    // TODO(amirh): remove this on when the invokeMethod update makes it to stable Flutter.
     // https://github.com/flutter/flutter/issues/26431
     // ignore: strong_mode_implicit_dynamic_method
     if (_modelLocation == ModelLocation.Local) {
-      final List<dynamic> reply = await FirebaseVision.channel.invokeMethod(
+      Stream<dynamic> data = Stream.empty();
+    FirebaseVision.channel.invokeListMethod<dynamic>(
         'VisionEdgeImageLabeler#processLocalImage',
         <String, dynamic>{
           'handle': _handle,
@@ -59,17 +58,21 @@ class VisionEdgeImageLabeler {
             'dataset': _dataset,
             'confidenceThreshold': _options.confidenceThreshold,
           },
-        }..addAll(visionImage._serialize()),
-      );
-
+        },
+).then((onValue){
+      const EventChannel resultsChannel = EventChannel('plugins.flutter.io/firebase_mlvision_results');
+      data = resultsChannel.receiveBroadcastStream();
+  });
+/*
       final List<VisionEdgeImageLabel> labels = <VisionEdgeImageLabel>[];
       for (dynamic data in reply) {
         labels.add(VisionEdgeImageLabel._(data));
       }
-
-      return labels;
+*/
+      return data;
     } else {
-      final List<dynamic> reply = await FirebaseVision.channel.invokeMethod(
+      Stream<dynamic> data = Stream.empty();
+    FirebaseVision.channel.invokeListMethod<dynamic>(
         'VisionEdgeImageLabeler#processRemoteImage',
         <String, dynamic>{
           'handle': _handle,
@@ -77,15 +80,18 @@ class VisionEdgeImageLabeler {
             'dataset': _dataset,
             'confidenceThreshold': _options.confidenceThreshold,
           },
-        }..addAll(visionImage._serialize()),
-      );
-
+        },
+).then((onValue){
+      const EventChannel resultsChannel = EventChannel('plugins.flutter.io/firebase_mlvision_results');
+      data = resultsChannel.receiveBroadcastStream();
+  });
+/*
       final List<VisionEdgeImageLabel> labels = <VisionEdgeImageLabel>[];
       for (dynamic data in reply) {
         labels.add(VisionEdgeImageLabel._(data));
       }
-
-      return labels;
+*/
+      return data;
     }
   }
 

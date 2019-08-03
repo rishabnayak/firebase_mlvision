@@ -65,13 +65,13 @@ class FaceDetector {
   bool _isClosed = false;
 
   /// Detects faces in the input image.
-  Future<List<Face>> processImage(FirebaseVisionImage visionImage) async {
+  Stream<List<Face>> startDetection() {
     assert(!_isClosed);
 
     _hasBeenOpened = true;
-    final List<dynamic> reply =
-        await FirebaseVision.channel.invokeListMethod<dynamic>(
-      'FaceDetector#processImage',
+    Stream<dynamic> data = Stream.empty();
+    FirebaseVision.channel.invokeListMethod<dynamic>(
+      'FaceDetector#startDetection',
       <String, dynamic>{
         'handle': _handle,
         'options': <String, dynamic>{
@@ -82,15 +82,12 @@ class FaceDetector {
           'minFaceSize': options.minFaceSize,
           'mode': _enumToString(options.mode),
         },
-      }..addAll(visionImage._serialize()),
-    );
-
-    final List<Face> faces = <Face>[];
-    for (dynamic data in reply) {
-      faces.add(Face._(data));
-    }
-
-    return faces;
+    },
+).then((onValue){
+      const EventChannel resultsChannel = EventChannel('plugins.flutter.io/firebase_mlvision_results');
+      data = resultsChannel.receiveBroadcastStream();
+  });
+    return data;
   }
 
   /// Release resources used by this detector.
