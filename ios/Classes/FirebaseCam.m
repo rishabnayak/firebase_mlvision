@@ -110,8 +110,8 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
        fromConnection:(AVCaptureConnection *)connection {
     CVImageBufferRef newBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
     if (newBuffer) {
-        if (!_isRecognizing) {
-            _isRecognizing = YES;
+        if (!_isRecognizingStream) {
+            _isRecognizingStream = YES;
             FIRVisionImage *visionImage = [[FIRVisionImage alloc] initWithBuffer:sampleBuffer];
             FIRVisionImageMetadata *metadata = [[FIRVisionImageMetadata alloc] init];
             FIRVisionDetectorImageOrientation visionOrientation = FIRVisionDetectorImageOrientationTopLeft;
@@ -119,6 +119,16 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
             metadata.orientation = visionOrientation;
             visionImage.metadata = metadata;
             [_activeDetector handleDetection:visionImage result:_eventSink];
+            _isRecognizingStream = NO;
+        }
+        if (_isRecognizing) {
+            FIRVisionImage *visionImage = [[FIRVisionImage alloc] initWithBuffer:sampleBuffer];
+            FIRVisionImageMetadata *metadata = [[FIRVisionImageMetadata alloc] init];
+            FIRVisionDetectorImageOrientation visionOrientation = FIRVisionDetectorImageOrientationTopLeft;
+            
+            metadata.orientation = visionOrientation;
+            visionImage.metadata = metadata;
+            [_activeDetector handleSingleDetection:visionImage result:_methodResult];
             _isRecognizing = NO;
         }
         CFRetain(newBuffer);

@@ -51,7 +51,7 @@ class VisionEdgeImageLabeler {
     if (_modelLocation == ModelLocation.Local) {
       Stream<dynamic> data = Stream.empty();
     FirebaseVision.channel.invokeListMethod<dynamic>(
-        'VisionEdgeImageLabeler#processLocalImage',
+        'VisionEdgeImageLabeler#startLocalDetection',
         <String, dynamic>{
           'handle': _handle,
           'options': <String, dynamic>{
@@ -73,7 +73,7 @@ class VisionEdgeImageLabeler {
     } else {
       Stream<dynamic> data = Stream.empty();
     FirebaseVision.channel.invokeListMethod<dynamic>(
-        'VisionEdgeImageLabeler#processRemoteImage',
+        'VisionEdgeImageLabeler#startRemoteDetection',
         <String, dynamic>{
           'handle': _handle,
           'options': <String, dynamic>{
