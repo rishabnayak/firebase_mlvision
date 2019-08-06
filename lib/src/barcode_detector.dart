@@ -207,28 +207,6 @@ class BarcodeDetector {
     );
   }
 
-  Future<List<Barcode>> processImage() async {
-    assert(!_isClosed);
-
-    _hasBeenOpened = true;
-    final List<dynamic> reply = await FirebaseVision.channel.invokeMethod<dynamic>(
-      'BarcodeDetector#processImage',
-      <String, dynamic>{
-        'handle': _handle,
-        'options': <String, dynamic>{
-          'barcodeFormats': options.barcodeFormats.value,
-        },
-      },
-    );
-
-    final List<Barcode> barcodes = <Barcode>[];
-    reply.forEach((dynamic barcode) {
-      barcodes.add(new Barcode._(barcode));
-    });
-
-    return barcodes;
-  }
-
   /// Release resources used by this detector.
   Future<void> close() {
     if (!_hasBeenOpened) _isClosed = true;

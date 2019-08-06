@@ -35,29 +35,6 @@
             }];
 }
 
-- (void)handleSingleDetection:(FIRVisionImage *)image result:(FlutterResult)result {
-    [_detector detectInImage:image
-                  completion:^(NSArray<FIRVisionBarcode *> *barcodes, NSError *error) {
-        if (error) {
-            [FLTFirebaseMlVisionPlugin handleError:error result:result];
-            return;
-        } else if (!barcodes) {
-            result(@[]);
-            return;
-        }
-        
-        NSMutableArray *ret = [NSMutableArray array];
-        for (FIRVisionBarcode *barcode in barcodes) {
-            [ret addObject:visionBarcodeToDictionary(barcode)];
-        }
-        result(@{
-            @"eventType" : @"detection",
-            @"data":ret
-        });
-    }];
-}
-
-
 NSDictionary *visionBarcodeToDictionary(FIRVisionBarcode *barcode) {
   __block NSMutableArray<NSArray *> *points = [NSMutableArray array];
 

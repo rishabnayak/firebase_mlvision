@@ -126,7 +126,6 @@ static NSMutableDictionary<NSNumber *, id<Detector>> *detectors;
                                                  binaryMessenger:_messenger];
             [eventChannel setStreamHandler:cam];
             cam.eventChannel = eventChannel;
-            cam.methodResult = result;
             result(@{
                 @"textureId" : @(textureId),
                 @"previewWidth" : @(cam.previewSize.width),
@@ -147,19 +146,6 @@ static NSMutableDictionary<NSNumber *, id<Detector>> *detectors;
         }
         _camera.activeDetector = detectors[handle];
         result(nil);
-    } else if ([@"BarcodeDetector#processImage" isEqualToString:call.method] ||
-               [@"FaceDetector#processImage" isEqualToString:call.method] ||
-               [@"ImageLabeler#processImage" isEqualToString:call.method] ||
-               [@"TextRecognizer#processImage" isEqualToString:call.method] ||
-               [@"VisionEdgeImageLabeler#processLocalImage" isEqualToString:call.method] ||
-               [@"VisionEdgeImageLabeler#processRemoteImage" isEqualToString:call.method]) {
-        id<Detector> detector = detectors[handle];
-        if (!detector) {
-            detector = [[BarcodeDetector alloc] initWithVision:[FIRVision vision] options:options];
-            [FLTFirebaseMlVisionPlugin addDetector:handle detector:detector];
-        }
-        _camera.isRecognizing = YES;
-        _camera.activeDetector = detectors[handle];
     } else if ([@"BarcodeDetector#close" isEqualToString:call.method] ||
                [@"FaceDetector#close" isEqualToString:call.method] ||
                [@"ImageLabeler#close" isEqualToString:call.method] ||

@@ -10,7 +10,6 @@
 @required
 - (instancetype)initWithVision:(FIRVision *)vision options:(NSDictionary *)options;
 - (void)handleDetection:(FIRVisionImage *)image result:(FlutterEventSink)result;
-- (void)handleSingleDetection:(FIRVisionImage *)image result:(FlutterResult)result;
 @optional
 @end
 

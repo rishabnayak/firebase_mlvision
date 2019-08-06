@@ -196,6 +196,12 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
   bool _isDisposed = false;
   StreamSubscription<dynamic> _eventSubscription;
   Completer<void> _creatingCompleter;
+  BarcodeDetector barcodeDetector;
+  FaceDetector faceDetector;
+  ImageLabeler cloudImageLabeler;
+  ImageLabeler localImageLabeler;
+  TextRecognizer textRecognizer;
+  VisionEdgeImageLabeler visionEdgeImageLabeler;
 
   static const MethodChannel channel = MethodChannel('plugins.flutter.io/firebase_mlvision');
 
@@ -283,10 +289,10 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
 
   /// Creates an instance of [BarcodeDetector].
   Future<Stream<List<Barcode>>> addBarcodeDetector([BarcodeDetectorOptions options]) async {
-    BarcodeDetector detector = BarcodeDetector._(options ?? const BarcodeDetectorOptions(),
+    barcodeDetector = BarcodeDetector._(options ?? const BarcodeDetectorOptions(),
     nextHandle++,
     );
-    await detector.startDetection();
+    await barcodeDetector.startDetection();
     return EventChannel('plugins.flutter.io/firebase_mlvision$_textureId').receiveBroadcastStream().map((convert) {
       dynamic data = convert['data'];
       final List<Barcode> barcodes = <Barcode>[];
@@ -297,24 +303,16 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
     });
   }
 
-    Future<List<Barcode>> detectBarcode([BarcodeDetectorOptions options]) async {
-    BarcodeDetector detector = BarcodeDetector._(options ?? const BarcodeDetectorOptions(),
-    nextHandle++,
-    );
-    List<Barcode> result = await detector.processImage();
-    return result;
-  }
-
   /// Creates an instance of [VisionEdgeImageLabeler].
   Future<Stream<List<VisionEdgeImageLabel>>> addVisionEdgeImageLabeler(
       String dataset, String modelLocation,
       [VisionEdgeImageLabelerOptions options]) async {
-    VisionEdgeImageLabeler detector = VisionEdgeImageLabeler._(
+    visionEdgeImageLabeler = VisionEdgeImageLabeler._(
         options: options ?? const VisionEdgeImageLabelerOptions(),
         dataset: dataset,
         handle: nextHandle++,
         modelLocation: modelLocation);
-    await detector.startDetection();
+    await visionEdgeImageLabeler.startDetection();
     return EventChannel('plugins.flutter.io/firebase_mlvision$_textureId').receiveBroadcastStream().map((convert) {
       dynamic data = convert['data'];
       final List<VisionEdgeImageLabel> labels = <VisionEdgeImageLabel>[];
@@ -327,10 +325,10 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
 
   /// Creates an instance of [FaceDetector].
   Future<Stream<List<Face>>> addFaceDetector([FaceDetectorOptions options]) async {
-    FaceDetector detector = FaceDetector._(options ?? const FaceDetectorOptions(),
+    faceDetector = FaceDetector._(options ?? const FaceDetectorOptions(),
     nextHandle++,
     );
-        await detector.startDetection();
+        await faceDetector.startDetection();
     return EventChannel('plugins.flutter.io/firebase_mlvision$_textureId').receiveBroadcastStream().map((convert) {
       dynamic data = convert['data'];
       final List<Face> faces = <Face>[];
@@ -348,12 +346,12 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
 
   /// Creates an on device instance of [ImageLabeler].
   Future<Stream<List<ImageLabel>>> addImageLabeler([ImageLabelerOptions options]) async {
-    ImageLabeler labeler = ImageLabeler._(
+    localImageLabeler = ImageLabeler._(
       options: options ?? const ImageLabelerOptions(),
       modelType: ModelType.onDevice,
       handle: nextHandle++,
     );
-      await labeler.startDetection();
+      await localImageLabeler.startDetection();
     return EventChannel('plugins.flutter.io/firebase_mlvision$_textureId').receiveBroadcastStream().map((convert) {
       dynamic data = convert['data'];
       final List<ImageLabel> labels = <ImageLabel>[];
@@ -366,11 +364,11 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
 
   /// Creates an instance of [TextRecognizer].
   Future<Stream<List<VisionText>>> addTextRecognizer([TextRecognizer options]) async {
-    TextRecognizer recognizer = TextRecognizer._(
+    textRecognizer = TextRecognizer._(
       modelType: ModelType.onDevice,
       handle: nextHandle++,
   );
-  await recognizer.startDetection();
+  await textRecognizer.startDetection();
   return EventChannel('plugins.flutter.io/firebase_mlvision$_textureId').receiveBroadcastStream().map((convert) {
       dynamic data = convert['data'];
       final List<VisionText> texts = <VisionText>[];
@@ -382,12 +380,12 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
   }
   /// Creates a cloud instance of [ImageLabeler].
   Future<Stream<List<ImageLabel>>> addCloudImageLabeler([CloudImageLabelerOptions options]) async {
-    ImageLabeler labeler = ImageLabeler._(
+    cloudImageLabeler = ImageLabeler._(
       options: options ?? const CloudImageLabelerOptions(),
       modelType: ModelType.cloud,
       handle: nextHandle++,
     );
-    await labeler.startDetection();
+    await cloudImageLabeler.startDetection();
     return EventChannel('plugins.flutter.io/firebase_mlvision$_textureId').receiveBroadcastStream().map((convert) {
       dynamic data = convert['data'];
       final List<ImageLabel> labels = <ImageLabel>[];

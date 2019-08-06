@@ -9,13 +9,11 @@ AVCaptureVideoDataOutputSampleBufferDelegate,
 AVCaptureAudioDataOutputSampleBufferDelegate,
 FlutterStreamHandler>
 @property(assign, atomic) BOOL isRecognizingStream;
-@property(assign, atomic) BOOL isRecognizing;
 @property(readonly, nonatomic) int64_t textureId;
 @property(nonatomic, copy) void (^onFrameAvailable)();
 @property(nonatomic) id<Detector> activeDetector;
 @property(nonatomic) FlutterEventChannel *eventChannel;
 @property(nonatomic) FlutterEventSink eventSink;
-@property(nonatomic) FlutterResult methodResult;
 @property(readonly, nonatomic) AVCaptureSession *captureSession;
 @property(readonly, nonatomic) AVCaptureDevice *captureDevice;
 @property(readonly, nonatomic) AVCaptureVideoDataOutput *captureVideoOutput;

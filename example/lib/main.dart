@@ -35,6 +35,12 @@ class _MyHomePageState extends State<_MyHomePage> {
     });
   }
 
+  void _scanImage() {
+    _vision.detectBarcode().then((onValue){
+      print(onValue);
+    });
+  }
+
   Widget _buildImage() {
     return Container(
       constraints: const BoxConstraints.expand(),
@@ -64,6 +70,10 @@ class _MyHomePageState extends State<_MyHomePage> {
         title: const Text('ML Vision Example'),
       ),
       body: _buildImage(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _scanImage,
+        child: const Icon(Icons.fingerprint),
+      )
     );
   }
 }

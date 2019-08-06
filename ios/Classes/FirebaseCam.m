@@ -121,16 +121,6 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
             [_activeDetector handleDetection:visionImage result:_eventSink];
             _isRecognizingStream = NO;
         }
-        if (_isRecognizing) {
-            FIRVisionImage *visionImage = [[FIRVisionImage alloc] initWithBuffer:sampleBuffer];
-            FIRVisionImageMetadata *metadata = [[FIRVisionImageMetadata alloc] init];
-            FIRVisionDetectorImageOrientation visionOrientation = FIRVisionDetectorImageOrientationTopLeft;
-            
-            metadata.orientation = visionOrientation;
-            visionImage.metadata = metadata;
-            [_activeDetector handleSingleDetection:visionImage result:_methodResult];
-            _isRecognizing = NO;
-        }
         CFRetain(newBuffer);
         CVPixelBufferRef old = _latestPixelBuffer;
         while (!OSAtomicCompareAndSwapPtrBarrier(old, newBuffer, (void **)&_latestPixelBuffer)) {
