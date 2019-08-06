@@ -50,7 +50,7 @@ class VisionEdgeImageLabeler {
     // ignore: strong_mode_implicit_dynamic_method
     if (_modelLocation == ModelLocation.Local) {
     await FirebaseVision.channel.invokeMethod<dynamic>(
-        'VisionEdgeImageLabeler#processLocalImage',
+        'VisionEdgeImageLabeler#startLocalDetection',
         <String, dynamic>{
           'handle': _handle,
           'options': <String, dynamic>{
@@ -61,7 +61,7 @@ class VisionEdgeImageLabeler {
     );
     } else {
    await FirebaseVision.channel.invokeListMethod<dynamic>(
-        'VisionEdgeImageLabeler#processRemoteImage',
+        'VisionEdgeImageLabeler#startRemoteDetection',
         <String, dynamic>{
           'handle': _handle,
           'options': <String, dynamic>{
