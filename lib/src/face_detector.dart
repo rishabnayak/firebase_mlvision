@@ -65,12 +65,11 @@ class FaceDetector {
   bool _isClosed = false;
 
   /// Detects faces in the input image.
-  Stream<List<Face>> startDetection() {
+  Future<void> startDetection() async {
     assert(!_isClosed);
 
     _hasBeenOpened = true;
-    Stream<dynamic> data = Stream.empty();
-    FirebaseVision.channel.invokeListMethod<dynamic>(
+    await FirebaseVision.channel.invokeMethod<dynamic>(
       'FaceDetector#startDetection',
       <String, dynamic>{
         'handle': _handle,
@@ -83,11 +82,7 @@ class FaceDetector {
           'mode': _enumToString(options.mode),
         },
     },
-).then((onValue){
-      const EventChannel resultsChannel = EventChannel('plugins.flutter.io/firebase_mlvision_results');
-      data = resultsChannel.receiveBroadcastStream();
-  });
-    return data;
+);
   }
 
   /// Release resources used by this detector.

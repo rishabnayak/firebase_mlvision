@@ -300,23 +300,39 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
   }
 
   /// Creates an instance of [VisionEdgeImageLabeler].
-  Stream<List<VisionEdgeImageLabel>> addVisionEdgeImageLabeler(
+  Future<Stream<List<VisionEdgeImageLabel>>> addVisionEdgeImageLabeler(
       String dataset, String modelLocation,
-      [VisionEdgeImageLabelerOptions options]) {
+      [VisionEdgeImageLabelerOptions options]) async {
     VisionEdgeImageLabeler detector = VisionEdgeImageLabeler._(
         options: options ?? const VisionEdgeImageLabelerOptions(),
         dataset: dataset,
         handle: nextHandle++,
         modelLocation: modelLocation);
-    return detector.startDetection();
+    await detector.startDetection();
+    return EventChannel('plugins.flutter.io/firebase_mlvision$_textureId').receiveBroadcastStream().map((convert) {
+      dynamic data = convert['data'];
+      final List<VisionEdgeImageLabel> labels = <VisionEdgeImageLabel>[];
+      data.forEach((dynamic label) {
+        labels.add(new VisionEdgeImageLabel._(label));
+      });
+      return labels;
+    });
   }
 
   /// Creates an instance of [FaceDetector].
-  Stream<List<Face>> addFaceDetector([FaceDetectorOptions options]) {
+  Future<Stream<List<Face>>> addFaceDetector([FaceDetectorOptions options]) async {
     FaceDetector detector = FaceDetector._(options ?? const FaceDetectorOptions(),
     nextHandle++,
     );
-        return detector.startDetection();
+        await detector.startDetection();
+    return EventChannel('plugins.flutter.io/firebase_mlvision$_textureId').receiveBroadcastStream().map((convert) {
+      dynamic data = convert['data'];
+      final List<Face> faces = <Face>[];
+      data.forEach((dynamic face) {
+        faces.add(new Face._(face));
+      });
+      return faces;
+    });
   }
 
   /// Creates an instance of [ModelManager].
@@ -325,31 +341,55 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
   }
 
   /// Creates an on device instance of [ImageLabeler].
-  Stream<List<ImageLabel>> addImageLabeler([ImageLabelerOptions options]) {
+  Future<Stream<List<ImageLabel>>> addImageLabeler([ImageLabelerOptions options]) async {
     ImageLabeler labeler = ImageLabeler._(
       options: options ?? const ImageLabelerOptions(),
       modelType: ModelType.onDevice,
       handle: nextHandle++,
     );
-  return labeler.startDetection();
+      await labeler.startDetection();
+    return EventChannel('plugins.flutter.io/firebase_mlvision$_textureId').receiveBroadcastStream().map((convert) {
+      dynamic data = convert['data'];
+      final List<ImageLabel> labels = <ImageLabel>[];
+      data.forEach((dynamic label) {
+        labels.add(new ImageLabel._(label));
+      });  
+      return labels;
+    });
   }
 
   /// Creates an instance of [TextRecognizer].
-  Stream<List<VisionText>> addTextRecognizer([TextRecognizer options]) {
+  Future<Stream<List<VisionText>>> addTextRecognizer([TextRecognizer options]) async {
     TextRecognizer recognizer = TextRecognizer._(
       modelType: ModelType.onDevice,
       handle: nextHandle++,
   );
-  return recognizer.startDetection();
+  await recognizer.startDetection();
+  return EventChannel('plugins.flutter.io/firebase_mlvision$_textureId').receiveBroadcastStream().map((convert) {
+      dynamic data = convert['data'];
+      final List<VisionText> texts = <VisionText>[];
+      data.forEach((dynamic text) {
+        texts.add(new VisionText._(text));
+      });  
+      return texts;
+    });
   }
   /// Creates a cloud instance of [ImageLabeler].
-  Stream<List<ImageLabel>> addCloudImageLabeler([CloudImageLabelerOptions options]) {
+  Future<Stream<List<ImageLabel>>> addCloudImageLabeler([CloudImageLabelerOptions options]) async {
     ImageLabeler labeler = ImageLabeler._(
       options: options ?? const CloudImageLabelerOptions(),
       modelType: ModelType.cloud,
       handle: nextHandle++,
     );
-    return labeler.startDetection();
+    await labeler.startDetection();
+    return EventChannel('plugins.flutter.io/firebase_mlvision$_textureId').receiveBroadcastStream().map((convert) {
+      dynamic data = convert['data'];
+      final List<ImageLabel> labels = <ImageLabel>[];
+      data.forEach((dynamic label) {
+        labels.add(new ImageLabel._(label));
+      });  
+      return labels;
+    });
   }
 }
 

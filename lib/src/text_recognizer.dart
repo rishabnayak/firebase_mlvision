@@ -32,12 +32,11 @@ class TextRecognizer {
   bool _isClosed = false;
 
   /// Detects [VisionText] from a [FirebaseVisionImage].
-  Stream<List<VisionText>> startDetection() {
+  Future<void> startDetection() async{
     assert(!_isClosed);
 
     _hasBeenOpened = true;
-    Stream<dynamic> data = Stream.empty();
-    FirebaseVision.channel.invokeListMethod<dynamic>(
+    await FirebaseVision.channel.invokeMethod<dynamic>(
       'TextRecognizer#startDetection',
       <String, dynamic>{
         'handle': _handle,
@@ -45,12 +44,7 @@ class TextRecognizer {
           'modelType': _enumToString(modelType),
         },
       },
-
-    ).then((onValue){
-      const EventChannel resultsChannel = EventChannel('plugins.flutter.io/firebase_mlvision_results');
-      data = resultsChannel.receiveBroadcastStream();
-  });
-    return data;
+    );
   }
 
   /// Release resources used by this recognizer.
