@@ -49,14 +49,8 @@ class VisionEdgeImageLabeler {
     // https://github.com/flutter/flutter/issues/26431
     // ignore: strong_mode_implicit_dynamic_method
     if (_modelLocation == ModelLocation.Local) {
-<<<<<<< HEAD
-      Stream<dynamic> data = Stream.empty();
-    FirebaseVision.channel.invokeListMethod<dynamic>(
-        'VisionEdgeImageLabeler#startLocalDetection',
-=======
     await FirebaseVision.channel.invokeMethod<dynamic>(
         'VisionEdgeImageLabeler#processLocalImage',
->>>>>>> 8da78af3aa9f402eed917529c7953602f1053ffa
         <String, dynamic>{
           'handle': _handle,
           'options': <String, dynamic>{
@@ -66,14 +60,8 @@ class VisionEdgeImageLabeler {
         },
     );
     } else {
-<<<<<<< HEAD
-      Stream<dynamic> data = Stream.empty();
-    FirebaseVision.channel.invokeListMethod<dynamic>(
-        'VisionEdgeImageLabeler#startRemoteDetection',
-=======
    await FirebaseVision.channel.invokeListMethod<dynamic>(
         'VisionEdgeImageLabeler#processRemoteImage',
->>>>>>> 8da78af3aa9f402eed917529c7953602f1053ffa
         <String, dynamic>{
           'handle': _handle,
           'options': <String, dynamic>{
