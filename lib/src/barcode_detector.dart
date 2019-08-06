@@ -196,7 +196,7 @@ class BarcodeDetector {
     assert(!_isClosed);
 
     _hasBeenOpened = true;
-    Stream<dynamic> data = Stream.empty();
+    Stream<Barcode> data = Stream.empty();
     FirebaseVision.channel.invokeListMethod<dynamic>(
       'BarcodeDetector#startDetection',
       <String, dynamic>{
@@ -207,7 +207,10 @@ class BarcodeDetector {
       },
     ).then((onValue){
       const EventChannel resultsChannel = EventChannel('plugins.flutter.io/firebase_mlvision_results');
-      data = resultsChannel.receiveBroadcastStream().map((convert) => Barcode._(convert));
+      data = resultsChannel.receiveBroadcastStream().map((convert){
+        print(convert);
+        return Barcode._(convert);
+        });
     });
     return data;
   }

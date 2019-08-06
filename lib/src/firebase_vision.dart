@@ -256,6 +256,9 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
     }
 
     switch (map['eventType']) {
+      case 'detection':
+        // print(event['data']);
+        break;
       case 'error':
         value = value.copyWith(errorDescription: event['errorDescription']);
         break;

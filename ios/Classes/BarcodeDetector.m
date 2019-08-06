@@ -28,8 +28,11 @@
                   for (FIRVisionBarcode *barcode in barcodes) {
                     [ret addObject:visionBarcodeToDictionary(barcode)];
                   }
-                  result(ret);
-                }];
+                result(@{
+                    @"eventType" : @"detection",
+                    @"data":ret
+                });
+            }];
 }
 
 NSDictionary *visionBarcodeToDictionary(FIRVisionBarcode *barcode) {

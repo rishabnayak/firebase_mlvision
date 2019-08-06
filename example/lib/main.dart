@@ -23,12 +23,12 @@ class _MyHomePageState extends State<_MyHomePage> {
 
   void _initializeCamera() async {
     List<FirebaseCameraDescription> cameras = await camerasAvailable();
-    _vision = FirebaseVision(cameras[0], ResolutionSetting.high);
+    _vision = FirebaseVision(cameras[0], ResolutionSetting.low);
     _vision.initialize().then((_) {
       if (!mounted) {
         return;
       }
-      _vision.addBarcodeDetector().forEach((action) => print(action)); 
+      _vision.addBarcodeDetector(); 
       setState(() {});
     });
   }

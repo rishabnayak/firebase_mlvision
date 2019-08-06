@@ -2,7 +2,7 @@
 
 #import "Firebase/Firebase.h"
 
-@interface FLTFirebaseMlVisionPlugin : NSObject <FlutterPlugin, FlutterStreamHandler>
+@interface FLTFirebaseMlVisionPlugin : NSObject <FlutterPlugin>
 + (void)handleError:(NSError *)error result:(FlutterResult)result;
 @end
 

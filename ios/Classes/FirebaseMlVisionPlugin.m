@@ -17,7 +17,6 @@ FlutterStreamHandler>
 @property(readonly, nonatomic) int64_t textureId;
 @property(nonatomic, copy) void (^onFrameAvailable)();
 @property(nonatomic) id<Detector> activeDetector;
-@property(nonatomic) FlutterEventSink resultSink;
 @property(nonatomic) FlutterEventChannel *eventChannel;
 @property(nonatomic) FlutterEventSink eventSink;
 @property(readonly, nonatomic) AVCaptureSession *captureSession;
@@ -152,7 +151,8 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
             
             metadata.orientation = visionOrientation;
             visionImage.metadata = metadata;
-            [_activeDetector handleDetection:visionImage result:_resultSink];
+            [_activeDetector handleDetection:visionImage result:_eventSink];
+            _isRecognizing = NO;
         }
         CFRetain(newBuffer);
         CVPixelBufferRef old = _latestPixelBuffer;
@@ -223,7 +223,6 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 }
 
 static NSMutableDictionary<NSNumber *, id<Detector>> *detectors;
-FlutterEventSink resultSink;
 
 + (void)handleError:(NSError *)error result:(FlutterResult)result {
     result(getFlutterError(error));
@@ -231,14 +230,12 @@ FlutterEventSink resultSink;
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar {
     detectors = [NSMutableDictionary new];
-    FlutterEventChannel *results = [FlutterEventChannel eventChannelWithName:@"plugins.flutter.io/firebase_mlvision_results" binaryMessenger:[registrar messenger]];
     FlutterMethodChannel *channel =
     [FlutterMethodChannel methodChannelWithName:@"plugins.flutter.io/firebase_mlvision"
                                 binaryMessenger:[registrar messenger]];
     FLTFirebaseMlVisionPlugin *instance = [[FLTFirebaseMlVisionPlugin alloc] initWithRegistry:[registrar textures]
                                                                                     messenger:[registrar messenger]];
     [registrar addMethodCallDelegate:instance channel:channel];
-    [results setStreamHandler:instance];
     
     SEL sel = NSSelectorFromString(@"registerLibrary:withVersion:");
     if ([FIRApp respondsToSelector:sel]) {
@@ -542,16 +539,6 @@ FlutterEventSink resultSink;
     }
     
     detectors[handle] = detector;
-}
-
-- (FlutterError * _Nullable)onCancelWithArguments:(id _Nullable)arguments {
-    resultSink = nil;
-    return nil;
-}
-
-- (FlutterError * _Nullable)onListenWithArguments:(id _Nullable)arguments eventSink:(nonnull FlutterEventSink)events {
-    resultSink = events;
-    return nil;
 }
 
 @end
