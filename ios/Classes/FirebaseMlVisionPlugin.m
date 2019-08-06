@@ -153,6 +153,7 @@ static NSMutableDictionary<NSNumber *, id<Detector>> *detectors;
                [@"VisionEdgeImageLabeler#close" isEqualToString:call.method]) {
         NSNumber *handle = call.arguments[@"handle"];
         [detectors removeObjectForKey:handle];
+        _camera.activeDetector = nil;
         result(nil);
     } else {
         result(FlutterMethodNotImplemented);

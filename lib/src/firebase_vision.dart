@@ -303,6 +303,10 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
     });
   }
 
+  Future<void> removeBarcodeDetector() async {
+    await barcodeDetector.close();
+  }
+
   /// Creates an instance of [VisionEdgeImageLabeler].
   Future<Stream<List<VisionEdgeImageLabel>>> addVisionEdgeImageLabeler(
       String dataset, String modelLocation,
@@ -323,6 +327,10 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
     });
   }
 
+  Future<void> removeVisionEdgeImageLabeler() async {
+    await visionEdgeImageLabeler.close();
+  }
+
   /// Creates an instance of [FaceDetector].
   Future<Stream<List<Face>>> addFaceDetector([FaceDetectorOptions options]) async {
     faceDetector = FaceDetector._(options ?? const FaceDetectorOptions(),
@@ -337,6 +345,10 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
       });
       return faces;
     });
+  }
+
+  Future<void> removeFaceDetector() async {
+    await faceDetector.close();
   }
 
   /// Creates an instance of [ModelManager].
@@ -362,6 +374,10 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
     });
   }
 
+  Future<void> removeImageLabeler() async {
+    await localImageLabeler.close();
+  }
+
   /// Creates an instance of [TextRecognizer].
   Future<Stream<List<VisionText>>> addTextRecognizer([TextRecognizer options]) async {
     textRecognizer = TextRecognizer._(
@@ -378,6 +394,11 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
       return texts;
     });
   }
+
+  Future<void> removeTextRecognizer() async {
+    await textRecognizer.close();
+  }
+
   /// Creates a cloud instance of [ImageLabeler].
   Future<Stream<List<ImageLabel>>> addCloudImageLabeler([CloudImageLabelerOptions options]) async {
     cloudImageLabeler = ImageLabeler._(
@@ -395,6 +416,11 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
       return labels;
     });
   }
+
+  Future<void> removeCloudImageLabeler() async {
+    await cloudImageLabeler.close();
+  }
+
 }
 
 String _enumToString(dynamic enumValue) {

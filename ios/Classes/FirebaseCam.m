@@ -45,6 +45,85 @@ FourCharCode const format = kCVPixelFormatType_32BGRA;
     return self;
 }
 
+- (void)imageOrientation {
+    [self imageOrientationFromDevicePosition:AVCaptureDevicePositionBack];
+}
+
+- (UIImageOrientation)imageOrientationFromDevicePosition:(AVCaptureDevicePosition)devicePosition {
+    UIDeviceOrientation deviceOrientation = UIDevice.currentDevice.orientation;
+    if (deviceOrientation == UIDeviceOrientationFaceDown ||
+        deviceOrientation == UIDeviceOrientationFaceUp ||
+        deviceOrientation == UIDeviceOrientationUnknown) {
+        deviceOrientation = [self currentUIOrientation];
+    }
+    switch (deviceOrientation) {
+        case UIDeviceOrientationPortrait:
+            return devicePosition == AVCaptureDevicePositionFront ? UIImageOrientationLeftMirrored
+            : UIImageOrientationRight;
+        case UIDeviceOrientationLandscapeLeft:
+            return devicePosition == AVCaptureDevicePositionFront ? UIImageOrientationDownMirrored
+            : UIImageOrientationUp;
+        case UIDeviceOrientationPortraitUpsideDown:
+            return devicePosition == AVCaptureDevicePositionFront ? UIImageOrientationRightMirrored
+            : UIImageOrientationLeft;
+        case UIDeviceOrientationLandscapeRight:
+            return devicePosition == AVCaptureDevicePositionFront ? UIImageOrientationUpMirrored
+            : UIImageOrientationDown;
+        case UIDeviceOrientationFaceDown:
+        case UIDeviceOrientationFaceUp:
+        case UIDeviceOrientationUnknown:
+            return UIImageOrientationUp;
+    }
+}
+
+- (FIRVisionDetectorImageOrientation)visionImageOrientationFromImageOrientation:
+(UIImageOrientation)imageOrientation {
+    switch (imageOrientation) {
+        case UIImageOrientationUp:
+            return FIRVisionDetectorImageOrientationTopLeft;
+        case UIImageOrientationDown:
+            return FIRVisionDetectorImageOrientationBottomRight;
+        case UIImageOrientationLeft:
+            return FIRVisionDetectorImageOrientationLeftBottom;
+        case UIImageOrientationRight:
+            return FIRVisionDetectorImageOrientationRightTop;
+        case UIImageOrientationUpMirrored:
+            return FIRVisionDetectorImageOrientationTopRight;
+        case UIImageOrientationDownMirrored:
+            return FIRVisionDetectorImageOrientationBottomLeft;
+        case UIImageOrientationLeftMirrored:
+            return FIRVisionDetectorImageOrientationLeftTop;
+        case UIImageOrientationRightMirrored:
+            return FIRVisionDetectorImageOrientationRightBottom;
+    }
+}
+
+- (UIDeviceOrientation)currentUIOrientation {
+    UIDeviceOrientation (^deviceOrientation)(void) = ^UIDeviceOrientation(void) {
+        switch (UIApplication.sharedApplication.statusBarOrientation) {
+            case UIInterfaceOrientationLandscapeLeft:
+                return UIDeviceOrientationLandscapeRight;
+            case UIInterfaceOrientationLandscapeRight:
+                return UIDeviceOrientationLandscapeLeft;
+            case UIInterfaceOrientationPortraitUpsideDown:
+                return UIDeviceOrientationPortraitUpsideDown;
+            case UIInterfaceOrientationPortrait:
+            case UIInterfaceOrientationUnknown:
+                return UIDeviceOrientationPortrait;
+        }
+    };
+    
+    if (NSThread.isMainThread) {
+        return deviceOrientation();
+    } else {
+        __block UIDeviceOrientation currentOrientation = UIDeviceOrientationPortrait;
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            currentOrientation = deviceOrientation();
+        });
+        return currentOrientation;
+    }
+}
+
 - (void)start {
     [_captureSession startRunning];
 }
@@ -114,8 +193,11 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
             _isRecognizingStream = YES;
             FIRVisionImage *visionImage = [[FIRVisionImage alloc] initWithBuffer:sampleBuffer];
             FIRVisionImageMetadata *metadata = [[FIRVisionImageMetadata alloc] init];
-            FIRVisionDetectorImageOrientation visionOrientation = FIRVisionDetectorImageOrientationTopLeft;
-            
+            UIImageOrientation orientation = [self
+                                              imageOrientationFromDevicePosition:[_captureDevice position] == AVCaptureDevicePositionFront ? AVCaptureDevicePositionFront
+                                              : AVCaptureDevicePositionBack];
+            FIRVisionDetectorImageOrientation visionOrientation =
+            [self visionImageOrientationFromImageOrientation:orientation];
             metadata.orientation = visionOrientation;
             visionImage.metadata = metadata;
             [_activeDetector handleDetection:visionImage result:_eventSink];

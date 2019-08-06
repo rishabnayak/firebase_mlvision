@@ -35,10 +35,8 @@ class _MyHomePageState extends State<_MyHomePage> {
     });
   }
 
-  void _scanImage() {
-    _vision.detectBarcode().then((onValue){
-      print(onValue);
-    });
+  void _removeDetector() {
+    _vision.removeBarcodeDetector();
   }
 
   Widget _buildImage() {
@@ -71,9 +69,9 @@ class _MyHomePageState extends State<_MyHomePage> {
       ),
       body: _buildImage(),
       floatingActionButton: FloatingActionButton(
-        onPressed: _scanImage,
+        onPressed: _removeDetector,
         child: const Icon(Icons.fingerprint),
-      )
+      ),
     );
   }
 }
