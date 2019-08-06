@@ -1,33 +1,6 @@
+#import "FirebaseCam.h"
 #import <AVFoundation/AVFoundation.h>
-#import "FirebaseMlVisionPlugin.h"
 #import <libkern/OSAtomic.h>
-#import "UserAgent.h"
-
-@interface FirebaseCam : NSObject <FlutterTexture,
-AVCaptureVideoDataOutputSampleBufferDelegate,
-AVCaptureAudioDataOutputSampleBufferDelegate,
-FlutterStreamHandler>
-@property(assign, atomic) BOOL isRecognizing;
-@property(readonly, nonatomic) int64_t textureId;
-@property(nonatomic, copy) void (^onFrameAvailable)();
-@property(nonatomic) id<Detector> activeDetector;
-@property(nonatomic) FlutterEventChannel *eventChannel;
-@property(nonatomic) FlutterEventSink eventSink;
-@property(readonly, nonatomic) AVCaptureSession *captureSession;
-@property(readonly, nonatomic) AVCaptureDevice *captureDevice;
-@property(readonly, nonatomic) AVCaptureVideoDataOutput *captureVideoOutput;
-@property(readonly, nonatomic) AVCaptureInput *captureVideoInput;
-@property(readonly) CVPixelBufferRef volatile latestPixelBuffer;
-@property(readonly, nonatomic) CGSize previewSize;
-
-- (instancetype)initWithCameraName:(NSString *)cameraName
-                  resolutionPreset:(NSString *)resolutionPreset
-                     dispatchQueue:(dispatch_queue_t)dispatchQueue
-                             error:(NSError **)error;
-
-- (void)start;
-- (void)stop;
-@end
 
 @implementation FirebaseCam {
     dispatch_queue_t _dispatchQueue;
@@ -83,13 +56,13 @@ FourCharCode const format = kCVPixelFormatType_32BGRA;
 - (void)setCaptureSessionPreset:(NSString *)resolutionPreset {
     int presetIndex;
     if ([resolutionPreset isEqualToString:@"high"]) {
-        presetIndex = 0;
-    } else if ([resolutionPreset isEqualToString:@"medium"]) {
         presetIndex = 2;
+    } else if ([resolutionPreset isEqualToString:@"medium"]) {
+        presetIndex = 3;
     } else {
         NSAssert([resolutionPreset isEqualToString:@"low"], @"Unknown resolution preset %@",
                  resolutionPreset);
-        presetIndex = 3;
+        presetIndex = 4;
     }
     switch (presetIndex) {
         case 0:

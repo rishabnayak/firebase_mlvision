@@ -256,9 +256,6 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
     }
 
     switch (map['eventType']) {
-      case 'detection':
-        // print(event['data']);
-        break;
       case 'error':
         value = value.copyWith(errorDescription: event['errorDescription']);
         break;
@@ -287,22 +284,31 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
   }
 
   /// Creates an instance of [BarcodeDetector].
-  Stream<Barcode> addBarcodeDetector([BarcodeDetectorOptions options]) {
+  Future<Stream<List<Barcode>>> addBarcodeDetector([BarcodeDetectorOptions options]) async {
     BarcodeDetector detector = BarcodeDetector._(options ?? const BarcodeDetectorOptions(),
     nextHandle++,
     );
-    return detector.startDetection();
+    await detector.startDetection();
+    return EventChannel('plugins.flutter.io/firebase_mlvision$_textureId').receiveBroadcastStream().map((convert) {
+      dynamic data = convert['data'];
+      final List<Barcode> barcodes = <Barcode>[];
+      data.forEach((dynamic barcode) {
+        barcodes.add(new Barcode._(barcode));
+      });
+      return barcodes;
+    });
   }
 
   /// Creates an instance of [VisionEdgeImageLabeler].
-  VisionEdgeImageLabeler visionEdgeImageLabeler(
+  Stream<List<VisionEdgeImageLabel>> addVisionEdgeImageLabeler(
       String dataset, String modelLocation,
       [VisionEdgeImageLabelerOptions options]) {
-    return VisionEdgeImageLabeler._(
+    VisionEdgeImageLabeler detector = VisionEdgeImageLabeler._(
         options: options ?? const VisionEdgeImageLabelerOptions(),
         dataset: dataset,
         handle: nextHandle++,
         modelLocation: modelLocation);
+    return detector.startDetection();
   }
 
   /// Creates an instance of [FaceDetector].

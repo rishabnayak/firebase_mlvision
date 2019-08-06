@@ -1,5 +1,5 @@
 #import "FirebaseMlVisionPlugin.h"
-#import "FirebaseCam.m"
+#import "FirebaseCam.h"
 
 static FlutterError *getFlutterError(NSError *error) {
     return [FlutterError errorWithCode:[NSString stringWithFormat:@"Error %d", (int)error.code]
@@ -140,6 +140,7 @@ static NSMutableDictionary<NSNumber *, id<Detector>> *detectors;
             [FLTFirebaseMlVisionPlugin addDetector:handle detector:detector];
         }
         _camera.activeDetector = detectors[handle];
+        result(nil);
     } else if ([@"BarcodeDetector#detectInImage" isEqualToString:call.method] ||
                [@"FaceDetector#processImage" isEqualToString:call.method] ||
                [@"ImageLabeler#processImage" isEqualToString:call.method] ||
