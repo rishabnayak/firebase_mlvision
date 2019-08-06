@@ -42,15 +42,14 @@ class VisionEdgeImageLabeler {
   bool _isClosed = false;
 
   /// Finds entities in the input image.
- Stream<List<VisionEdgeImageLabel>> startDetection() {
+ Future<void> startDetection() async {
     assert(!_isClosed);
 
     _hasBeenOpened = true;
     // https://github.com/flutter/flutter/issues/26431
     // ignore: strong_mode_implicit_dynamic_method
     if (_modelLocation == ModelLocation.Local) {
-      Stream<dynamic> data = Stream.empty();
-    FirebaseVision.channel.invokeListMethod<dynamic>(
+    await FirebaseVision.channel.invokeMethod<dynamic>(
         'VisionEdgeImageLabeler#processLocalImage',
         <String, dynamic>{
           'handle': _handle,
@@ -59,20 +58,9 @@ class VisionEdgeImageLabeler {
             'confidenceThreshold': _options.confidenceThreshold,
           },
         },
-).then((onValue){
-      const EventChannel resultsChannel = EventChannel('plugins.flutter.io/firebase_mlvision_results');
-      data = resultsChannel.receiveBroadcastStream();
-  });
-/*
-      final List<VisionEdgeImageLabel> labels = <VisionEdgeImageLabel>[];
-      for (dynamic data in reply) {
-        labels.add(VisionEdgeImageLabel._(data));
-      }
-*/
-      return data;
+    );
     } else {
-      Stream<dynamic> data = Stream.empty();
-    FirebaseVision.channel.invokeListMethod<dynamic>(
+   await FirebaseVision.channel.invokeListMethod<dynamic>(
         'VisionEdgeImageLabeler#processRemoteImage',
         <String, dynamic>{
           'handle': _handle,
@@ -81,17 +69,7 @@ class VisionEdgeImageLabeler {
             'confidenceThreshold': _options.confidenceThreshold,
           },
         },
-).then((onValue){
-      const EventChannel resultsChannel = EventChannel('plugins.flutter.io/firebase_mlvision_results');
-      data = resultsChannel.receiveBroadcastStream();
-  });
-/*
-      final List<VisionEdgeImageLabel> labels = <VisionEdgeImageLabel>[];
-      for (dynamic data in reply) {
-        labels.add(VisionEdgeImageLabel._(data));
-      }
-*/
-      return data;
+);
     }
   }
 
