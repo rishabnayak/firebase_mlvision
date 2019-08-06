@@ -329,18 +329,21 @@ class FirebaseVision extends ValueNotifier<FirebaseCameraValue> {
   }
 
   /// Creates an instance of [TextRecognizer].
-  TextRecognizer textRecognizer() => TextRecognizer._(
-    modelType: ModelType.onDevice,
-    handle: nextHandle++,
+  Stream<List<VisionText>> addTextRecognizer([TextRecognizer options]) {
+    TextRecognizer recognizer = TextRecognizer._(
+      modelType: ModelType.onDevice,
+      handle: nextHandle++,
   );
-
+  return recognizer.startDetection();
+  }
   /// Creates a cloud instance of [ImageLabeler].
-  ImageLabeler cloudImageLabeler([CloudImageLabelerOptions options]) {
-    return ImageLabeler._(
+  Stream<List<ImageLabel>> addCloudImageLabeler([CloudImageLabelerOptions options]) {
+    ImageLabeler labeler = ImageLabeler._(
       options: options ?? const CloudImageLabelerOptions(),
       modelType: ModelType.cloud,
       handle: nextHandle++,
     );
+    return labeler.startDetection();
   }
 }
 
