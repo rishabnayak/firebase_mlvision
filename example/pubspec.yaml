@@ -13,7 +13,6 @@ dependencies:
   firebase_mlvision:
     path: ../
   firebase_core: ^0.4.0
-  camera: ^0.4.2
 
 dev_dependencies:
   flutter_test:
