@@ -10,6 +10,8 @@ import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode;
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetector;
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetectorOptions;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
+
+import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.MethodChannel;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,7 +28,7 @@ class BarcodeDetector implements Detector {
   }
 
   @Override
-  public void handleDetection(final FirebaseVisionImage image, final MethodChannel.Result result) {
+  public void handleDetection(final FirebaseVisionImage image, final EventChannel.EventSink result) {
     detector
         .detectInImage(image)
         .addOnSuccessListener(
@@ -213,7 +215,10 @@ class BarcodeDetector implements Detector {
 
                   barcodes.add(barcodeMap);
                 }
-                result.success(barcodes);
+                Map<String, Object> res = new HashMap<>();
+                res.put("eventType", "detection");
+                res.put("data", barcodes);
+                result.success(res);
               }
             })
         .addOnFailureListener(

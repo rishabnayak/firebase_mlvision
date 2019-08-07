@@ -10,6 +10,8 @@ import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.text.FirebaseVisionText;
 import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer;
 import com.google.firebase.ml.vision.text.RecognizedLanguage;
+
+import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.MethodChannel;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,7 +35,7 @@ public class TextRecognizer implements Detector {
   }
 
   @Override
-  public void handleDetection(final FirebaseVisionImage image, final MethodChannel.Result result) {
+  public void handleDetection(final FirebaseVisionImage image, final EventChannel.EventSink result) {
     recognizer
         .processImage(image)
         .addOnSuccessListener(
@@ -86,7 +88,10 @@ public class TextRecognizer implements Detector {
                 }
 
                 visionTextData.put("blocks", allBlockData);
-                result.success(visionTextData);
+                Map<String, Object> res = new HashMap<>();
+                res.put("eventType", "detection");
+                res.put("data", visionTextData);
+                result.success(res);
               }
             })
         .addOnFailureListener(

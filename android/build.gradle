@@ -39,7 +39,7 @@ android {
     compileSdkVersion 28
 
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 21
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     lintOptions {
@@ -53,3 +53,5 @@ android {
         implementation 'androidx.exifinterface:exifinterface:1.0.0'
     }
 }
+
+apply from: file("./user-agent.gradle")

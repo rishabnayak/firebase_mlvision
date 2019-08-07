@@ -141,7 +141,21 @@ static NSMutableDictionary<NSNumber *, id<Detector>> *detectors;
                [@"VisionEdgeImageLabeler#startRemoteDetection" isEqualToString:call.method]){
         id<Detector> detector = detectors[handle];
         if (!detector) {
-            detector = [[BarcodeDetector alloc] initWithVision:[FIRVision vision] options:options];
+            if ([call.method hasPrefix:@"BarcodeDetector"]) {
+                detector = [[BarcodeDetector alloc] initWithVision:[FIRVision vision] options:options];
+            } else if ([call.method hasPrefix:@"FaceDetector"]) {
+                detector = [[FaceDetector alloc] initWithVision:[FIRVision vision] options:options];
+            } else if ([call.method hasPrefix:@"ImageLabeler"]) {
+                detector = [[ImageLabeler alloc] initWithVision:[FIRVision vision] options:options];
+            } else if ([call.method hasPrefix:@"TextRecognizer"]) {
+                detector = [[TextRecognizer alloc] initWithVision:[FIRVision vision] options:options];
+            } else if ([call.method isEqualToString:@"VisionEdgeImageLabeler#startLocalDetection"]) {
+                detector = [[LocalVisionEdgeDetector alloc] initWithVision:[FIRVision vision]
+                                                                options:options];
+            } else if ([call.method isEqualToString:@"VisionEdgeImageLabeler#startRemoteDetection"]) {
+                detector = [[RemoteVisionEdgeDetector alloc] initWithVision:[FIRVision vision]
+                                                                options:options];
+            }
             [FLTFirebaseMlVisionPlugin addDetector:handle detector:detector];
         }
         _camera.activeDetector = detectors[handle];

@@ -11,6 +11,8 @@ import com.google.firebase.ml.vision.face.FirebaseVisionFaceContour;
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector;
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions;
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceLandmark;
+
+import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.MethodChannel;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,7 +28,7 @@ class FaceDetector implements Detector {
   }
 
   @Override
-  public void handleDetection(final FirebaseVisionImage image, final MethodChannel.Result result) {
+  public void handleDetection(final FirebaseVisionImage image, final EventChannel.EventSink result) {
     detector
         .detectInImage(image)
         .addOnSuccessListener(
@@ -70,7 +72,10 @@ class FaceDetector implements Detector {
                   faces.add(faceData);
                 }
 
-                result.success(faces);
+                Map<String, Object> res = new HashMap<>();
+                res.put("eventType", "detection");
+                res.put("data", faces);
+                result.success(res);
               }
             })
         .addOnFailureListener(

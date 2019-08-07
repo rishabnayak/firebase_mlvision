@@ -12,6 +12,8 @@ import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.label.FirebaseVisionImageLabel;
 import com.google.firebase.ml.vision.label.FirebaseVisionImageLabeler;
 import com.google.firebase.ml.vision.label.FirebaseVisionOnDeviceAutoMLImageLabelerOptions;
+
+import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.MethodChannel;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -89,7 +91,7 @@ class RemoteVisionEdgeDetector implements Detector {
   }
 
   @Override
-  public void handleDetection(final FirebaseVisionImage image, final MethodChannel.Result result) {
+  public void handleDetection(final FirebaseVisionImage image, final EventChannel.EventSink result) {
     labeler
         .processImage(image)
         .addOnSuccessListener(
@@ -105,7 +107,10 @@ class RemoteVisionEdgeDetector implements Detector {
                   labels.add(labelData);
                 }
 
-                result.success(labels);
+                  Map<String, Object> res = new HashMap<>();
+                  res.put("eventType", "detection");
+                  res.put("data", labels);
+                  result.success(res);
               }
             })
         .addOnFailureListener(
